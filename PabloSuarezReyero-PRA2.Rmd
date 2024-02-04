@@ -1,0 +1,2468 @@
+---
+title: 'Minería de datos: PRA2 - Proyecto de minería de datos'
+author: "Autor: Nombre estudiante"
+date: "Enero 2024"
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    includes:
+      in_header: 75.584-PEC-header.html
+  word_document: default
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+------------------------------------------------------------------------
+
+# Enunciado
+
+------------------------------------------------------------------------
+
+Como continuación del estudio iniciado en la Práctica 1, procedemos a **aplicar modelos analíticos, tanto no supervisados como supervisados**, sobre el juego de datos seleccionado y ya preparado. En esta **Práctica 2** tendréis que cargar los datos previamente preparados en la **Práctica 1**.
+
+**Punto común para todos los ejercicios**
+
+En todos los apartados de los ejercicios de esta práctica se pide al estudiante, además de aplicar los diferentes métodos, analizar correctamente el problema, **detallar de manera exhaustiva** resaltando el por qué del análisis y cómo se ha realizado, incluir elementos visuales, explicar los resultados y realizar las comparativas oportunas con sus conclusiones.
+
+En toda la práctica es **necesario documentar** cada apartado del ejercicio que se ha hecho, el por qué y como se ha realizado. Asimismo, todas las decisiones y conclusiones deberán ser presentados de forma razonada y clara, **contextualizando los resultados**, es decir, especificando todos y cada uno de los pasos que se hayan llevado a cabo para su resolución.
+
+En definitiva, se pide al estudiante que complete los siguientes pasos con el juebo de datos preparado en la Práctica 1:
+
+**Modelos no supervisados**
+
+1.  Aplicar un modelo **no supervisado** basado en el concepto de distancia, sobre el juego de datos.
+
+2.  Aplicar de nuevo el modelo anterior, pero usando una **métrica de distancia diferente** y comparar los resultados.
+
+3.  Utilizar los algoritmos **DBSCAN y OPTICS**, probando con diferentes valores del parámetro `eps` y `minPts`, y comparar los resultados con los métodos anteriores.
+
+**Modelos supervisados**
+
+4.  Seleccionar una muestra de entrenamiento y una de test utilizando las proporciones que se consideren más adecudas en función de la disponibilidad de datos. Justificar dicha selección.
+
+5.  Aplicar un modelo de generación de reglas a partir de **árboles de decisión** ajustando las diferentes opciones para su obtención. Obtener el árbol sin y con opciones de poda. Obtener la matriz de confusión. Finalmente, comparar los resultados.
+
+6.  Aplicar un **modelo supervisado** diferente al del punto 5., se tiene que elegir entre los vistos en el material docente de la asignatura. Comparar el resultado con el modelo generado anteriormente.
+
+7.  Identificar eventuales **limitaciones** del dataset seleccionado y **analizar los riesgos** en el caso de utilizar el modelo para clasificar un nuevo caso.
+
+------------------------------------------------------------------------
+
+# Criterios de evaluación
+
+------------------------------------------------------------------------
+
+-   Ejercicio 1 - 25%
+    -   Se genera un modelo no supervisado.
+    -   Se analizan, muestran y comentan las medidas de calidad del modelo generado.
+    -   Se resumen las principales conclusiones.
+-   Ejercicio 2 - 10%
+    -   Se genera de nuevo el modelo no supervisado anterior, pero usando una métrica de distancia distinta.
+    -   Se muestran y comentan las medidas de calidad del modelo generado.
+    -   Adicionalmente, se comparan los dos modelos no supervisados con métricas de distancia diferentes.
+    -   Se resumen las principales conclusiones.
+-   Ejercicio 3 - 10%
+    -   Se aplican lo algoritmos DBSCAN y OPTICS de forma correcta.
+    -   Se prueban, describen e interpretan los resultados con diferentes valores de eps y minPts.
+    -   Se obtiene una medida de lo bueno que es el agrupamiento.
+    -   Se comparan los resultados obtenidos con los modelos de los ejercicios 1 y 2.
+    -   Se resumen las principales conclusiones.
+-   Ejercicio 4 - 10%
+    -   Se seleccionan las muestra de entrenamiento y test.
+    -   Se justifican las proporciones seleccionadas.
+-   Ejercicio 5 - 20%
+    -   Se generan reglas y se determinan e interpretan las más significativas.
+    -   Se extraen las reglas del modelo en formato texto y gráfico.
+    -   Adicionalmente, se genera matriz de confusión para medir la capacidad predictiva del algoritmo, teniendo en cuenta las distintas métricas asociadas a dicha matriz (precisión, sensibilidad, especificidad...).
+    -   Se comparan e interpretan los resultados (sin y con opciones de poda), explicando las ventajas e inconvenientes del modelo generado respecto a otro método de construcción.
+    -   Se evalúa la tasa de error del árbol generado, la eficiencia en la clasificación (en las muestras de entrenamiento y test) y la comprensibilidad del resultado.
+    -   Se resumen las principales conclusiones.
+-   Ejercicio 6 - 15%
+    -   Se prueba con una variación u otro enfoque algorítmico.
+    -   Se detalla, comenta y evalúa la calidad de la clasificación.
+    -   Se comparan los resultados de manera exhaustiva con el método supervisado del ejercicio 5.
+-   Ejercicio 7 - 10%
+    -   Se identifica qué posibles limitaciones tienen los datos que has seleccionado para obtener conclusiones con los modelos (supervisado y no supervisado)
+    -   Se identifican posibles riesgos del uso de los modelos (mínimo 300 palabras).
+
+------------------------------------------------------------------------
+
+# Recursos de programación
+
+------------------------------------------------------------------------
+
+-   Incluimos en este apartado una lista de recursos de programación para minería de datos donde podréis encontrar ejemplos, ideas e inspiración:
+
+    -   [Espacio de recursos UOC para ciencia de datos](http://@datascience.recursos.uoc.edu/es/)
+    -   [Buscador de código R](https://rseek.org/)\
+    -   [Colección de cheatsheets en R](https://rstudio.com/resources/cheatsheets/)
+
+------------------------------------------------------------------------
+
+# Formato y fecha de entrega
+
+------------------------------------------------------------------------
+
+El formato de entrega es: el output generado en formato **.html** con nombre **username_estudiante-PRA2**.
+
+La fecha límite de entrega es el 17/01/2024.
+
+------------------------------------------------------------------------
+
+# RESPUESTAS
+
+------------------------------------------------------------------------
+
+## Puesta en contexto
+
+Este apartado que acabamos de añadir, no estaba en el enunciado, pero en el caso de esta PAC creo que es necesario. Ya que como se comentó en la primera PAC, el *dataset* escogido cumple con todas las características que se mencionaban en el enunciado de la PAC1, pero lo único que faltaba, era una columna que contuviese el parámetro necesario a la hora de entrenar un modelo supervisado.
+
+Como sabemos por teoría, un modelo supervisado de un modelo no supervisado difiere principalmente en que el primero tiene datos etiquetados, mientras que el segundo no. Tomemos el ejemplo de la PAC1. En dicha PAC, se estableció que lo que se quería era clasificar a los clientes, según si eran o no aptos para optar a una tarjeta de crédito, por lo tanto. para poder aplicar un modelo supervisado a ese juego de datos, deberíamos añadir una columna con etiquetas que reflejásen esa información.
+
+Además, como se comentó en la PAC1, después de la modificación comentada en el párrafo anterior, el *dataset*: `application_record.csv` puede ser objeto de modelos supervisados (con etiquetas, i.e., se conoce el resultado) y no supervisados (sin etiquetas, i.e., principalmente para la búsqueda de características). Pero como se explicó en su momento, aunque el propio dataset no tenga una variable/columna binaria, que muestre, si el candidato es apto o no a obtener una tarjeta de crédito, dentro del zip del *datset* que se ha descargado, hay otro dataset llamado "credit_record.csv" que puede resolver este problema y que tiene las siguientes variables (columnas):
+
+-   **ID**: el identificador de cliente
+
+-   **MONTHS_BALANCE**: en este caso, el mes de los datos extraídos es el punto de partida, hacia atrás, 0 es el mes actual, -1 es el mes anterior, y así sucesivamente
+
+-   **STATUS:** estado de pago del crédito. Esta variable puede tomar los siguientes valores:
+
+    -   "0": 1-29 días de demora.
+    -   "1": 30-59 días de demora.
+    -   "2": 60-89 días de demora.
+    -   "3": 90-119 días de demora.
+    -   "4": 120-149 días de demora.
+    -   "5": Deudas vencibles o incobrables, cancelaciones de más de 150 días.
+    -   "C": Pagado ese mes, por lo que indica que el cliente ha pagado el préstamo o la tarjeta de crédito ese mes.
+    -   "X": Sin préstamo este mes.
+
+Cabe destacar que en dicho *dataset*, existen múltiples registros para un mismo cliente, ya que hay información mensual del mismo, en cuanto a créditos, desde que este abrió su cuenta en el banco. Cada registro, expresa el estado del crédito (en caso de que el cliente optáse por uno), por esto y por lo anterior, el *dataset* es extremadamente largo (ver este enlace: [discusion del dataset](https://www.kaggle.com/datasets/rikdifos/credit-card-approval-prediction/discussion/119320))
+
+Como se ha dicho en el anterior párrafo, este juego de datos tiene múltiples filas de información de cada candidato del *dataset* "application_record.csv", por lo tanto, a fin de poder aplicar un modelo supervisado en el *dataset* `application_record.csv` (una vez limpio y acondicionado, resultado de la PAC1) se podría crear una columna "apto o no apto" que contenga o 1s o 0s, dependiendo de si, en alguno de los históricos de cada uno de los candidatos que se muestran en "credit_record.csv" aparecen muchos "4s" o un "5" o una "C" en la variable "STATUS" (por lo tanto 0: no apto). Por último, esta nueva columa, se exportaría al *dataset* "application_record.csv" final.
+
+Tras estudiar dicho *dataset* (credit_record.csv), y darnos cuenta de que al crear (nosotros) las etiquetas podemos introducir mucha incertidumbre en el juego de datos, vamos a ser cautos. Por ello, en vez de clasificar de manera tan tajante a los clientes, como aptos o no aptos. Se va a optar, por clasificar a los clientes, dependiendo del grado de riesgo que conlleve, aprobarles una tarjeta de crédito, i.e., riesgo alto (1), riesgo bajo (0). En términos prácticos, esto no tiene ninguna repercusión en la tarea de clasificación, ya que el algoritmo decidirá igualmente solo entre dos valores. Pero esta decisión resulta importante de cara a la exposición del trabajo, pues hay que estar seguros de lo que se expone y ser justos con el trabajo realizado, por ello, he querido ser conservador y no tirarme a la piscina, ya que yo he creado las etiquetas y desconozco las características financieras que determinan la ideabilidad de un cliente frente a otro a la hora de optar a una tarjeta de crédito.
+
+Teniendo claro el *roadmap*, nos ponemos manos a la obra. Primero leemos el dataset `credit_record.csv`:
+
+```{r}
+# install.packages("magrittr") # package installations are only needed the first time you use it
+# install.packages("dplyr")    # alternative installation of the %>%
+library(magrittr) # needs to be run every time you start R and want to use %>%
+library(dplyr)    # alternatively, this also loads %>%
+
+nom_arxiu = 'credit_record.CSV'
+df_credit_rec <- read.csv(nom_arxiu)
+structure = str(df_credit_rec) 
+```
+
+Vemos que están las 3 columnas descritas arriba. Ahora vamos a comprobar las primeras y últimas filas del *dataset* para ver si hay algo extraño observable a primera vista.
+
+```{r}
+head(df_credit_rec)
+tail(df_credit_rec)
+```
+
+Como se puede comprobar no hay nada extraño. De todos modos vamos a comprobar si existen valores vacíos o nulos, y en caso de haberlos los eliminaremos.
+
+```{r}
+print("Valores NULOS dentro del df_credrec_ori")
+colSums(is.na(df_credit_rec))
+```
+
+Vemos que no hay ningúna fila con valores NULOS, ahora comprovbamos si hay filas con valores vacíos. Véase el siguiente *chunk* de código:
+
+```{r}
+print("Valores vacíos dentro del df_original")
+colSums(df_credit_rec == '')
+```
+
+Para nuestro alivio, no hay ninguna fila con valores vacíos. Ahora estamos en condiciones de procesar este dataset, a fin de poder obtener etiquetas de cada uno de los clientes ("ID") y poder introducirlas en el *dataset*: `application_record.csv`. Dicho esto, procedemos con el procesado.
+
+Para el procesado de este *dataset* vamos a tener en cuenta los posibles valores que puede tomar la variable: `STATUS`, ya que esta variable nos da la información acerca de cuanto tiempo les ha costado a los clientes devolver el crédito, si han pagado el crédito, o si no han tenido ningun crédito ese mes.
+
+Ahora vamos a ver que valores dentro de la variable `STATUS` tienen más ocurrencias:
+
+```{r}
+estado <- table(df_credit_rec$STATUS)
+barplot(prop.table(estado),col=c("green","grey","blue","cyan","orange","red","yellow","purple"), main=" Status", ylab = "Porcentaje (%)", las = 2)
+```
+
+Como podemos ver, la mayoría de los clientes (más de un 40%) han pagado uno, varios o todos sus créditos del mes, seguidamente, vemos como alrededor de un 37 % de los clientes se han atrasado entre 1 y 29 días en pagar uno, varios o todos sus créditos del mes. Luego, por último vemos como alrededor de un 20% de los clientes, no han tenido ningún crédito.
+
+Ahora que hemos ganado más *insights* vamos a empezar a seleccionar y determinar el tipo de filtrado que vamos a aplicar, para obtener etiquetas, de cara a la aplicación de un modelo supervisado. Para esto, leemos el *dataset* final de la PAC1.
+
+```{r}
+df_app_record <- read.csv("application_record_final.csv")
+structure = str(df_app_record) 
+```
+
+Primero vamos a comprobar cuantos registros únicos (IDs únicos) hay en cada *dataset* y luego estudiaremos cuantos registros comparten entre ellos, basándonos en los IDs:
+
+```{r}
+# valores únicos application_record
+unicos_app <- length(unique(df_app_record$ID))
+cat("En application_record, hay", unicos_app, "registros únicos")
+
+# valores únicos credit_record
+unicos_cred <- length(unique(df_credit_rec$ID))
+cat("\nEn credit_record, hay", unicos_cred, "registros únicos")
+
+intersección <- length(intersect(df_app_record$ID, df_credit_rec$ID))
+
+cat("\nLos dos datasets comparten", intersección,"registros")
+
+# cat('\nEl del original:', 36457*100/438510,"%")
+# cat('\nMi porcentaje:', 62608*100/438510,"%")
+```
+
+Para poder crear las etiquetas, vamos a simplificar el campo de `STATUS`, filtrando según los clientes que tengan 'X' o 'C' en dicho campo. Elegimos solo estas filas con estos valores, porque representan si el cliente ha tenido algun crédito o no. Si para diferentes meses el cliente tiene más 'X' que 'Cs' entonces, el cliente supondrá un riesgo bajo (0), en caso contrario, el cliente supondrá un riesgo alto (1).
+
+Luego de haber limitado los valores de `STATUS` entre X y C, creamos la variable que posteriormente usaremos para el modelo de clasificación supervisado. Para ello, se han implementado los siguientes pasos. Primero creamos la nueva columna llamada 'target' y la inicializamos con los mismos valores que la columna 'STATUS', seguidamente, reemplazamos los valores 'X' en la columna 'target' con 0's, este proceso lo repetimos con los valores 'C' de la misma columna. Luego, convertimos los valores en la columna 'target' a enteros, y por último, asignamos 1's a todos los valores en la columna 'target' que sean mayores o iguales a 1. Nótese como esta parte la vamos a hacer en Python, ya que resulta más fácil y aún no controlo del todo R.
+
+```{python}
+import pandas as pd
+
+py_df_credit_rec = pd.read_csv(r"credit_record.csv")
+print('Información acerca del dataset credit\n',py_df_credit_rec.info())
+
+# ahora leemos application_record
+py_df_app_rec = pd.read_csv(r"application_record_final.csv")
+print('\nInformación acerca del dataset application\n',py_df_app_rec.info())
+
+py_df_credit_rec.duplicated().sum()
+
+py_df_credit_rec['MONTHS_BALANCE'].unique()
+py_df_credit_rec['STATUS'].unique()
+
+py_df_credit_rec[py_df_credit_rec['STATUS'].isin(['X', 'C'])]
+
+py_df_credit_rec['ID'].nunique()
+
+# ahora creamos la variable target
+py_df_credit_rec['target']=py_df_credit_rec['STATUS']
+py_df_credit_rec['target'].replace('X', 0, inplace=True)
+py_df_credit_rec['target'].replace('C', 0, inplace=True)
+py_df_credit_rec['target']=py_df_credit_rec['target'].astype(int)
+py_df_credit_rec.loc[py_df_credit_rec['target']>=1,'target']=1
+
+# reiniciamos índices
+py_df_credit_rec2=pd.DataFrame(py_df_credit_rec.groupby(['ID'])['target'].agg("max")).reset_index()
+
+# cogemos 10 muestras al azar
+print("\n")
+py_df_credit_rec2.sample(10)
+
+# contamos las ocurrencias de cada valor que tiene la variable
+print("\nCantidad de valores de un tipo dentro de la variable target")
+py_df_credit_rec2["target"].value_counts()
+
+# Ahora vamos a combinar application_record y credit_record
+# basándonos en la columna ID, esto quiere decir, que solo
+# a añadir aquellas filas de credit_record cuyo ID coincida con 
+# uno dentro de application_record
+new_py_app_rec = pd.merge(py_df_app_rec, py_df_credit_rec2, how='inner', on=['ID'])
+```
+
+Ahora recuperamos el *dataset* final de 'credit_application.csv' en R:
+
+```{r}
+library(reticulate)
+
+df_credit_rec <- py$py_df_credit_rec
+summary(df_credit_rec)
+
+# ahora consultamos la información acerca del nuevo dataset que hemos juntado
+df_app_rec <- py$new_py_app_rec
+summary(df_app_rec)
+# structure(df_app_rec)
+
+# conultamos los primeros y los últimos valores, para chequear que los IDs coinciden
+head(df_app_rec)
+tail(df_app_rec)
+
+# ahora calculamos el número de ocurrencias de los dos posibles valores dentro
+# de la variable target:
+table(df_app_rec$target)
+```
+
+Como podemos ver por el resultado de arriba, a la hora de llevar a cabo la clasificación, tendremos que tener cuidado, ya que estamos ante un problema de clasificación binaria desequilibrado, i.e., hay muchos más registros de una clase que de otra.
+
+Ahora ya tenemos las etiquetas, pero para facilitar la tarea de clasificación, vamos a añadir la columna `MONTHS BALANCE` a nuestro *dataset*, ya que nos da información acerca del tiempo que lleva abierta, la cuenta del cliente
+
+```{python}
+# Extraemos el nº de meses que la cuenta lleva abierta
+inicio_df=pd.DataFrame(py_df_credit_rec.groupby(['ID'])['MONTHS_BALANCE'].agg(min)).reset_index()
+
+# Renombreamos la columna
+inicio_df.rename(columns={'MONTHS_BALANCE':'ACCOUNT_LENGTH'}, inplace=True)
+
+# Convertimos los días a nums positivos
+inicio_df['ACCOUNT_LENGTH']=-inicio_df['ACCOUNT_LENGTH']
+
+# ahora visualizamos el resultado:
+inicio_df
+
+# Ahora que ya tenemos la edad de las cuentas, lo añadimos al dataset
+df_app_rec=pd.merge(r.df_app_rec, inicio_df, how='inner', on=['ID'])
+```
+
+Ahora verificamos la estructura del *dataset* después de haber añadido la coluna `ACCOUNT_LENGTH`
+
+```{r}
+library(reticulate)
+
+# ahora consultamos la información acerca del nuevo dataset que hemos juntado
+df_app_rec <- py$df_app_rec
+df2_app_rec = df_app_rec
+summary(df_app_rec)
+# structure(df_app_rec)
+
+# conultamos los primeros y los últimos valores, para chequear que los IDs coinciden
+head(df_app_rec)
+tail(df_app_rec)
+
+# ahora calculamos el número de ocurrencias de los dos posibles valores dentro
+# de la variable target:
+table(df_app_rec$target)
+```
+
+Ya tenemos el juego de datos final, con las etiquetas que necesitaremos de cara a la aplicación del modelo supervisado. Algo positivo de haber añadido las dos últimas columnas, es que hemos conseguido reducir considerablemente el juego de datos, y seguramente con la limpieza inicial que hicimos en la PAC1, hayamos reducido el grado de desequilibrio de cara a la clasificación, i.e., puede que hayamos balanceado las propociones entre las dos clases existentes.
+
+## Ejercicio 1
+
+En este ejercicio nos centraremos en la aplicación de un modelo supervisado, así como el análisis de los resultados que este arroje.
+
+### Se genera un modelo no supervisado.
+
+Como bien se nos pide en este apartado, vamos a generar un modelo no supervisado que aplicaremos al *dataset* `application_record`. En teoría hemos visto varios algoritmos no supervisados, encargados de la clasificación de datos, y basados en cálculos de distancias. Algunos de estos algoritmos son:
+
+-   **k-means**
+-   **DBSCAN**
+-   **OPTICS**
+
+No osbtante, en este ejercicio nos centraremos en el algoritmo de *k-means* ya que será en el tercer ejercicio donde tendremos que aplicar los algoritmos de **DBSCAN** y de **OPTICS**. Dicho esto, aplicamos el algoritmo *k-means*, véase el siguiente *chunk*:
+
+```{r}
+# Primero cargamos la librería
+if (!require('cluster')) install.packages('cluster')
+library(cluster)
+```
+
+Una vez cargada la librería, presentamos gráficamente las columnas de datos más significativas y mejor representadas para nuestro estudio, que fueron descubiertas en la PAC1. Estas columnas/variables, eran:
+
+-   **AMT_INCOME_TOTAL**
+-   **DAYS_BIRTH**
+-   **DAYS_EMPLOYED**
+-   **CNT_CHILDREN**
+
+```{r}
+x <- rbind(df_app_record$AMT_INCOME_TOTAL,df_app_record$DAYS_BIRTH,df_app_record$DAYS_EMPLOYED,df_app_record$CNT_CHILDREN)
+par(mfrow = c(1, 4))
+plot(df_app_record$AMT_INCOME_TOTAL,xlab="Posición en la fila", ylab = "Salario anual")
+plot(df_app_record$DAYS_BIRTH,xlab="Posición en la fila", ylab = "Dias restantes hasta cumpleaños")
+plot(df_app_record$DAYS_EMPLOYED,xlab="Posición en la fila", ylab = "Días empleado")
+plot(df_app_record$CNT_CHILDREN,xlab="Posición en la fila", ylab = "Cantidad de hijos")
+
+# ahora cogemos el último dataset
+par(mfrow = c(1, 4))
+plot(df_app_rec$AMT_INCOME_TOTAL,xlab="Posición en la fila", ylab = "Salario anual")
+plot(df_app_rec$DAYS_BIRTH,xlab="Posición en la fila", ylab = "Dias restantes hasta cumpleaños")
+plot(df_app_rec$DAYS_EMPLOYED,xlab="Posición en la fila", ylab = "Días empleado")
+plot(df_app_rec$CNT_CHILDREN,xlab="Posición en la fila", ylab = "Cantidad de hijos")
+```
+
+En la primera ventana de resultados, correspondiente al dataset sacado de la PAC1, podemos observar las zonas más densamente pobladas, en el caso del salario anual, vemos como la mayoría de clientes tiene un salario entre los 0 y un poco menos de 1e6. A pesar de que generalmente no conseguimos ver grupos de valores muy diferenciados, vemos un efecto degradado en la variable de días empleados, donde puede verse una mayor densidad de clientes en los valores más cercanos a 0, signifcando esto, que gran parte de los clientes llevan poco tiempo empleados (aquellos con un valor negativo pequeño en magnitud, de días) o que han sido contratados ese mismo día (si el valor es 0)
+
+Ahora, observando los resultados obtenidos en la segunda ventana, correpsondiente al *dataset* final, que usaremos en esta PAC, vemos un mismo comportamiento, pero algo más claro, porque hay muchos menos registros, en concreto, hemos pasado de tener 62608 registros a tener solamente 6715. Esto significa, que nos hemos quedado tan solo con el 10,73 % de los datos contenidos en el *dataset* original. Esto es algo bueno, porque como se ha mencionado a principio de este párrafo, aunque observamos el mismo comportamiento que en la primera ventana de resultados (como no podía ser de otra manera), podemos observar el patrón que siguen los valores de manera más clara, porque hay menor densidad de registros.
+
+A diferencia de la primera ventana de resultados, en la segunda tanda (la correspondiente al dataset con 6715 registros) podemos ver como la mayor parte de los clientes tienen menos hijos (lógico, porque hemos obviado muchos registros). Además, respecto al salario anual (posiblemente la variable más decisiva) vemos como gran parte de los clientes se concentran en el rango salarial anual de entre los 0-500000, mientras que en la primera tanda de resultados veíamos muchos clientes concentrados en el doble de dicha franja, i.e., 0-1000000. Además, gracias a la purga que hemos hecho, al tener menos registros, podemos ver como hay una parte notable de clientes, que se distribuyen de manera horizontal entre los rangos de 0-500000 y 500000-1000000.
+
+Generalmente observmoas comportamientos esperados, así como un par de valores *outliers* cuyo impacto estudiaremos a la hora de aplicar el modelo de los *k-means*.
+
+Ahora vamos a representar la variable correspondiente al salario anual de los clientes, frente al resto, vamos a ver que comportamiento se observa y si podemos inferir más información.
+
+```{r}
+# par(mfrow = c(1, 4))
+# #Ahora se va a probar a representar un atributo frente a otro:
+# plot(Hawks2$Wing,Hawks2$Weight,xlab="Wing [mm]", ylab = "Weight [mm]")
+# plot(Hawks2$Culmen,Hawks2$Hallux,xlab="Culmen [mm]", ylab = "Hallux [mm]")
+# plot(Hawks2$Weight,Hawks2$Culmen,xlab="Weight [mm]", ylab = "Culmen [mm]")
+# plot(Hawks2$Wing,Hawks2$Culmen,xlab="Wing [mm]", ylab = "Culmen [mm]")
+
+par(mfrow = c(1, 4))
+plot(df_app_rec$DAYS_BIRTH,df_app_rec$AMT_INCOME_TOTAL,ylab="Salario anual", xlab = "Días cumpleaños")
+plot(df_app_rec$DAYS_EMPLOYED,df_app_rec$DAYS_BIRTH,ylab="Días cumpleaños", xlab = "Días empleado")
+plot(df_app_rec$DAYS_EMPLOYED,df_app_rec$CNT_CHILDREN,xlab="Días empleado", ylab = "Nº hijos")
+plot(df_app_rec$AMT_INCOME_TOTAL,df_app_rec$CNT_CHILDREN,ylab="Nº hijos", xlab = "Salario anual")
+```
+
+Por los resultados de arriba, no inferimos información adicional que no conociésemos de la PAC1. Vemos como la primera gráfica (días hasta el cumpleaños y salario) guardan una correlación baja. En la segunda gráfica observamos un comportamiento lineal entre los días de cumpleaños y los días empleados, esto tiene sentido porque son dos variables temporales, pero no parece que guarden una correlación lo suficientemente interesante como para ser estudiadas conjuntamente. Seguidamente, en la penúltima gráfica , vemos como a medida que aumenta el número de hijos, el número de días que un cliente está empleado disminuye, por lo tanto son dos variables inversamente proporcionales. Por último, en la última gráfica, vemos como a medida que aumenta el número de hijos, el salario de los clientes disminuye notablemente.
+
+Acabamos de ver la gran relación que existe entre las variables: días empleado, y número de hijos así como entre el par: número de hijos y salario anual. Esto nos podrá servir de cara al estudio de los clústeres.
+
+Ahora que ya nos hemos puesto un poco más en contexto respecto a la PAC1. Vamos a proceder con la aplicación del algoritmo. Para ello, primero vamos a calcular el número de clústeres ideal, dependiendo de la métrica 'Silhouette'
+
+```{r}
+# Establecemos la semilla aleatoria para el cálculo de k y de cara a la clasificació
+# a fin de obtener siempre el mismo resultado
+set.seed(6543)
+
+# 6543
+
+if (!require('cluster')) install.packages('cluster')
+library(cluster)
+
+# cogemos solo las 4 variables de antes
+app_rec_kmeans = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+                                "CNT_CHILDREN")]
+
+d <- daisy(app_rec_kmeans)
+#Se podría también llevar a cabo con la siguiente función:
+#d <- dist(Hawks2)
+
+resultados <- rep(0, 10) #Se inicializa un vector lleno de 0 para luego poblarlo con los resultados de los cálculos efectuados.
+for (i in c(2,3,4,5,6,7,8,9,10))
+{
+  fit           <- kmeans(app_rec_kmeans, i)
+  y_cluster     <- fit$cluster
+  sk            <- silhouette(y_cluster, d)
+  resultados[i] <- mean(sk[,3])
+}
+cat(resultados)
+
+#Ahora se representan los valores que se han obtenido arriba:
+plot(1:10,resultados,type="o",col="blue",pch=0,xlab="Número de clusters [k]",ylab="Silueta", main = "Primer gráfico con daisy")
+```
+
+No observamos un comportamiento inicial decreciente pero luego ascendiente, para finalmente asentarse a partir de k=8. Esto puede deberse a la gran cantidad de registros, pero de todos modos, vamos a utilizar la función `dist` para ver si está arroja mejores resultados en cuanto a la búsqueda del número óptimo de clústeres.
+
+Ahora vamos a probar con el cálculo de distancia que ofrece la función `dist(·)`, véase el siguiente *chunk* de código.
+
+```{r}
+# Establecemos la semilla aleatoria para el cálculo de k y de cara a la clasificació
+# a fin de obtener siempre el mismo resultado
+set.seed(6543)
+
+dist <- dist(app_rec_kmeans)
+cat('Este es el tipo de variable que es dist: ', class(dist))
+resultados_dist <- rep(0, 10) #Se inicializa un vector lleno de 0 para luego poblarlo con los resultados de los cálculos efectuados.
+for (i in c(2,3,4,5,6,7,8,9,10))
+{
+  fit           <- kmeans(app_rec_kmeans, i)
+  y_cluster     <- fit$cluster
+  sk            <- silhouette(y_cluster, dist)
+  resultados_dist[i] <- mean(sk[,3])
+}
+cat('\n',resultados_dist)
+# ahora representamos los resultados gráficamente:
+plot(1:10,resultados_dist,type="o",col="orange",pch=0,xlab="Número de clusters [k]",ylab="Silueta", main = "Primer gráfico con dist")
+
+```
+
+Como se puede ver claramente, la función `dist` arroja los mismos resultados que aquellos obtenidos con `daisy`. Esto se debe a que son funciones equivalentes, aunque la principal característica que las hace diferentes, es el tipo de datos que pueden manejar, ya que `daisy` permite manejar datos mixtos (i.e., datos categóricos y numéricos) mientras que `dist` solo permite trabajar o con datos numéricos o con datos categóricos. Vabe destacar que como es lógico, si cambiamos el valor de la semilla aleatoria, y este difiere entre el cálculo con `dist` y con `daisy` entonces se obtendrán resultados diferentes, pero si la semilla es la misma a la hora de calcular los valores de k para los dos tipos de distancias, entonces el resultado obtenido será el mismo.
+
+Véase la comparativa entre las dos funciones a continuación:
+
+```{r}
+plot(1:10,resultados_dist,type="o",col="blue",pch=0,xlab="Número de clusters [k]",ylab="Silueta", main = "Comparativa entre 'daisy' y 'dist'")
+lines(1:10,resultados,type="o",col="orange",pch=0)
+legend("topright", legend = c("daisy(·)", "dist(·)"), col = c("blue", "orange"), lty = 1)
+```
+
+Como podemos ver, son resultados idénticos. Ahora bien, hay que tener en cuenta que para saber como de bien se han clasificado las muestras en los clusters, se ha hecho uso del coeficiente de Silhouette. Como se sabe por teoría, este coeficiente, permite saber lo bien que está integrado un punto en el gruppodríamos decir como el número çoptimo de clústeres sería k=2 ya que el llamado "codo" (punto de inflexión del trazo) se encuentra en ese valor de K, ya que es en k=2 dónde la curva empieza a estabilizarse. No obstante, este resultado es un poco precario, ya que estamos obviando más de la mitad del *dataset*, ya que solo hemos cogido las variables más relevantes identificadas en la PAC1 y aquellas que mejor representación tenían. Vemos como el coeficiente de la silueta es del 0.63, no es un coeficiente muy alto, pero puede ser aceptable ya que es mayor que 0.5, teniendo en cuenta que el coeficiente de silhouette por definición está definido como $s \in [-1, ... , 1]$ $\therefore$ $s \in \mathbb{R}$ y además viendo que la media de los coeficientes obtenidos es de 0.5 (sin tener en cuenta el coeficiente para k = 1)
+
+Dicho lo anterior, vamos a añadir más campos al *dataset*, entre ellos estará la columna 'target' que es la columna de las etiquetas, para ver si esta es capaz de fijar el número de clústeres a 2 (ya que es una variable binaria) Además, y debido a la diferencia entre las dos funciones de cálculos de distancias, a partir de ahora se va a implementar la función `daisy`.
+
+```{r}
+summary(df_app_rec) 
+```
+
+Cabe destacar que en este caso, no podremos introducir variables discretizadas en el *dataframe* que le vamos a meter al algoritmo k-means, ya que las columnas tienen que estar formadas por valores numéricos o categóricos. Es por esto, que adicionalmente, añadiremos la columna de `target`
+
+```{r}
+set.seed(6543)
+
+if (!require('cluster')) install.packages('cluster')
+library(cluster)
+
+# cogemos solo las 4 variables de antes
+app_rec_kmeans_fin = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+                                "CNT_CHILDREN", "target")]
+
+d_kmeans_final <- daisy(app_rec_kmeans_fin)
+#Se podría también llevar a cabo con la siguiente función:
+#d <- dist(Hawks2)
+
+resultados_kmeans_fin <- rep(0, 10) #Se inicializa un vector lleno de 0 para luego poblarlo con los resultados de los cálculos efectuados.
+for (i in c(2,3,4,5,6,7,8,9,10))
+{
+  fit           <- kmeans(app_rec_kmeans_fin, i)
+  y_cluster     <- fit$cluster
+  sk            <- silhouette(y_cluster, d_kmeans_final)
+  resultados_kmeans_fin[i] <- mean(sk[,3])
+}
+cat(resultados_kmeans_fin)
+
+#Ahora se representan los valores que se han obtenido arriba:
+plot(1:10,resultados_kmeans_fin,type="o",col="blue",pch=0,xlab="Número de clusters [k]",ylab="Silueta", main = "Segundo gráfico con daisy")
+
+# vamos a comparar los restultados respecto a la anterior gráfica obtenida
+plot(1:10,resultados_kmeans_fin,type="o",col="blue",pch=0,xlab="Número de clusters [k]",ylab="Silueta", main = "Comparativa entre 'CON TARGET' y 'SIN TARGET'")
+lines(1:10,resultados,type="o",col="orange",pch=0)
+legend("bottomright", legend = c("CON target", "SIN target"), col = c("blue", "orange"), lty = 1)
+```
+
+Como podemos comprobar, las gráficas son exactamente iguales, no hay ninguna diferencia, de hecho el coeficiente de silhouette más alto es para k = 2 y sigue siendo de 0.63. Teniendo estos resultados, diríamos que el número de clústeres óptimo sería k = 2, pues es ahí dónde la gráfica parece estabilizarse, y donde el coeficiente de silhouette es mayor.
+
+Como vimos en la PEC2, otra manera de determinar el número óptimo de clústeres es considerar el mejor modelo, aquel que proporciona la menor suma de los cuadrados de las distancias de los puntos dentro de cada grupo con respecto a su centro (withinss), al mismo tiempo que busca la mayor separación entre los centros de los grupos (betweenss). Esta aproximación es conceptualmente similar al enfoque de la silueta. Un método común para la selección del número de clústeres es aplicar el método del codo, que implica seleccionar el número de clústeres al inspeccionar la gráfica obtenida al iterar con el mismo conjunto de datos para diferentes valores del número de clústeres. Se elige el valor que se encuentra en el punto de "codo" de la curva.
+
+```{r}
+set.seed(6543)
+resultados_kmeans_fin2 <- rep(0, 10) #Se inicializa un vector lleno de 0 para luego poblarlo con los resultados de los cálculos efectuados.
+for (i in c(2,3,4,5,6,7,8,9,10))
+{
+  fit           <- kmeans(app_rec_kmeans_fin, i)
+  resultados_kmeans_fin2[i] <- fit$tot.withinss
+}
+#Ahora se lleva a cabo la representación de la grafica y se compara con el gráfico obtenido en el chunk anterior;
+plot(1:10,resultados_kmeans_fin2,type="o",col="blue",pch=0,xlab="Número de clusters [k]",ylab="tot.tot.withinss",main = "Último gráfico")
+```
+
+Aquí podemos observar como la gráfica empieza a estabilizarse a partir de k=3, pero claro, contextualizando este resultado, a nuestro objetivo, nos damos cuenta de que solo deberíamos de tener dos clases y por lo tanto k debería de ser 2. Como es obvio, no esperábamos que el modelo supiese de nuestras preferencias, menos aun, sabiendo que se trata de un modelo no supervisado. Por lo tanto, aunque los resultados no expresen tajantemente que el número de clústeres óptimos sea 2, tomaremos por si acaso dos posibles valores de k $k \in [2,3]$
+
+También había otras alternativas para saber la cantidad óptima de clústeres, otra opción es la ofrecida por el paquete: `fpc`
+
+```{r}
+set.seed(6543)
+if (!require('fpc')) install.packages('fpc') #Se descarga la librería, en caso de que noe estuviese descargada.
+library(fpc)
+
+fit_ch  <- kmeansruns(app_rec_kmeans_fin, krange = 1:10, criterion = "ch") 
+fit_asw <- kmeansruns(app_rec_kmeans_fin, krange = 1:10, criterion = "asw") 
+
+#Ahora se comprueba el número óptimo k para los dos métodos:
+cat("Este es el número óptimo de clústers para el método Calinski-Harabasz: ", fit_ch$bestk)
+cat("\nEste es el número óptimo de clústers para el método de la silueta media: ", fit_asw$bestk)
+
+# ahora vamos a representar las graáficas de los dos métodos:
+plot(1:10,fit_ch$crit,type="o",col="blue",pch=0,xlab="Número de clústers [k]",ylab="Criterio Calinski-Harabasz", main="Calinski-Harabasz")
+plot(1:10,fit_asw$crit,type="o",col="red",pch=0,xlab="Número de clústers [k]",ylab="Criterio silueta media", main="Silueta media")
+```
+
+Como podemos ver, el resultado arrojado por el método Calinski-Harabasz es completamente desproporcional a nuestros objetivos. No osbtante, cabe destacar que en el caso de la PEC2 obtuvimos un resultado parecido (k=10 para clasificar solo 3 clases) por lo tanto es similar a nuestro caso, ya que (k=9) para clasificar solo 2 clases, hay una diferencia de 7 clústeres entre lo que el método Calinski-Harabasz estima, y el número de clústeres reales que queremos tener.
+
+Ahora bien, observando el resultado ofrecido por el método de la silueta media, vemos como k = 2 clústeres, es algo más lógico, y para nuestra tranquilidad, coincide con nuestro objetivo, en cuanto al número de clases que queremos clasificar en este proyecto, que son solo 2.
+
+Ahora que conocemos el número de clústeres que queremos tener, vamos a aplicar el algoritmo:
+
+```{r}
+# app_rec_kmeans_fin[c(1,2)]
+k=2
+set.seed(6543)
+app_rec_kmeansk2 <- kmeans(app_rec_kmeans_fin, k)
+
+# Salario anual y días hasta el cumpleaños
+par(mfrow = c(1,2))
+plot(app_rec_kmeans_fin[c(1,2)], col=app_rec_kmeansk2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(app_rec_kmeans_fin[c(1,2)], col=as.factor(app_rec_kmeans_fin$target), main="Clasificación real")
+
+# Salario anual y días empleado
+par(mfrow = c(1,2))
+plot(app_rec_kmeans_fin[c(1,3)], col=app_rec_kmeansk2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(app_rec_kmeans_fin[c(1,3)], col=as.factor(app_rec_kmeans_fin$target), main="Clasificación real")
+
+# Salario anual cantidad de hijos
+par(mfrow = c(1,2))
+plot(app_rec_kmeans_fin[c(1,4)], col=app_rec_kmeansk2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(app_rec_kmeans_fin[c(1,4)], col=as.factor(app_rec_kmeans_fin$target), main="Clasificación real")
+
+# Salario anual y target
+par(mfrow = c(1,2))
+plot(app_rec_kmeans_fin[c(1,5)], col=app_rec_kmeansk2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(app_rec_kmeans_fin[c(1,5)], col=as.factor(app_rec_kmeans_fin$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y días empleado
+par(mfrow = c(1,2))
+plot(app_rec_kmeans_fin[c(2,3)], col=app_rec_kmeansk2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(app_rec_kmeans_fin[c(2,3)], col=as.factor(app_rec_kmeans_fin$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y cantidad de hijos
+par(mfrow = c(1,2))
+plot(app_rec_kmeans_fin[c(2,4)], col=app_rec_kmeansk2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(app_rec_kmeans_fin[c(2,4)], col=as.factor(app_rec_kmeans_fin$target), main="Clasificación real")
+
+# Días empleado y cantidad de hijos
+par(mfrow = c(1,2))
+plot(app_rec_kmeans_fin[c(3,4)], col=app_rec_kmeansk2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hastael cumpleaños (REAL)
+plot(app_rec_kmeans_fin[c(3,4)], col=as.factor(app_rec_kmeans_fin$target), main="Clasificación real")
+# app_rec_kmeansk2[c(1,2,3,4,5)]
+```
+
+Como se puede observar, no son buenos resultados en cuanto a clasificación. Estos malos resultados se deben principalmente a que los datos están **SIN NORMALIZAR**. Como ya vimos en la PEC2, no obtuvimos buenos resultados en cuanto a clasificación, hasta que no normalizamos los datos, fue en ese momento cuando los resultados mejoraron, y el algoritmo era capaz de categorizar mejor los registros del juego de datos.
+
+No obstante, a pesar de que no estén normalizados los datos, podemos destacar dos resultados que podrían aprobar, en cuanto a tarea de clasificación acometida, estos buenos resultados se corresponden con los pares: (días empleado & días hasta cumpleaños) y (nº hijos & días hasta cumpleaños). Mientras que para la relación entre el salario anual y la cantidad de días hasta el cumpleaños parece no arrojar buenos resultados, así como para los pares (salario & días empleado) (salario & nº hijos) (salario & target)
+
+Los mejores resultados observables, son para el par (días empleado & días hasta cumpleaños), en dicho resultado podemos ver claramente como la mayor parte de los registros son clasificados correctamente, y por lo tanto, hay una mayor densidad de registros clasificados correctamente, en comparación al resto de pares de variables.
+
+Teniendo en cuenta esto, y a fin de obtener mejores resultados de clasificación procedemos a normalizar los datos. Véase a continuación el siguiente *chunk* de código.
+
+```{r}
+summary(app_rec_kmeans_fin)
+set.seed(6543)
+
+# # Antes de normalizar los datos, vamos a eliminar el cliente que tiene 19 hijos, para evitar problemas
+# # a la hora de aplicar los modelos
+# dfdf <- app_rec_kmeans_fin[app_rec_kmeans_fin$CNT_CHILDREN != 19, ]
+# rownames(df) <- NULL
+# 
+# # verificamos que hemos eliminado la fila y que hemos reseteado correctamente la numeración de las filas
+# tail(df)
+
+#Ahora se normalizan el resto de atributos.
+app_rec_kmeans_fin_norm <- scale(app_rec_kmeans_fin)
+df_app_rec_kmeans_fin_norm <- as.data.frame(app_rec_kmeans_fin_norm)
+
+# Echamos un ojo a los valores que hemos normalizado
+summary(df_app_rec_kmeans_fin_norm)
+```
+
+Ahora repetimos el proceso pero con los datos normalizados, véase el siguiente *chunk* de código.
+
+```{r}
+# app_rec_kmeans_fin[c(1,2)]
+k=2
+set.seed(1000)
+# 6543
+app_rec_kmeansk2_norm <- kmeans(df_app_rec_kmeans_fin_norm, k)
+
+# Salario anual y días hasta el cumpleaños
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=app_rec_kmeansk2_norm$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=app_rec_kmeansk2_norm$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=app_rec_kmeansk2_norm$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y target
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=app_rec_kmeansk2_norm$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=app_rec_kmeansk2_norm$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=app_rec_kmeansk2_norm$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días empleado y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=app_rec_kmeansk2_norm$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hastael cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+# app_rec_kmeansk2[c(1,2,3,4,5)]
+```
+
+Como podemos comprobar, ahora que hemos normalizado los resultados, podemos observar claramente como los resultados de clasificación han mejorado notablemente. Cabe destacar, como los colores entre las gráficas relativas a la clasificación están invertidos respecto a los colores en las gráficas correspondientes a los resultados reales. Esto quiere decir, que el clúster formado por los registros rojos en la gráfica de clasificación del k-means, se corresponde con el clúster de muestras negras en la gráfica de los resultados reales.
+
+En definitiva, la normalización de los datos ha permitido una clasificación bastante buena, para todos los conjuntos de atributos. En esta tarea de clasificación, se ha visto como la normalización, es de gran ayuda cuando una relación entre atributos se ve "contaminada" por una diferencia de escalas. Al normalizar, todos los valores de cada uno de los atributos se ven comprendidos dentro del mismo conjunto de valores y así, la posterior tarea de clasificación no sufre las desventajas propias de los defectos de escalas.
+
+### Se analizan, muestran y comentan las medidas de calidad del modelo generado.
+
+Para analizar la calidad de la tarea de clasificación, podemos tener en cuenta diferentes métricas, entre ellas la silueta media. Esta métrica ya la hemos comentado antes, y probablemente sea de las métricas más importantes dentro del propio algoritmo de los k-means.
+
+No obstante, por teoría, sabemos que existen otras dos métricas más:
+
+-   **SSW**. Estas siglas, en inglés significan: *Sum of squared within*. Esta métrica mide la cohesión de los grupos obtenidos. Esta métrica se calcula de la siguiente manera: $SSW = \sum_{i=1}^{k}\sum_{x_j \in G_i} (x_j - \mu_i)^2$ donde k es el número de clústers, $x_j$ se corresponde con la muestra j del grupo $G_i$ y $\mu_i$ es el centroide del i-ésimo grupo $G_i$. Cuanto menor sea SSW, más cohesionados estarán los grupos, ya que las distancias entre las muestras y sus centroides, serán menores.
+
+-   **SSB**. Estas siglas, en inglés significan: *Sum of squared between*. Esta métrica refleja la separación entre los grupos obtenidos y se puede calcular de la siguiente manera: $SSB = \sum_{i=1}^{k} |G_i|(\mu - \mu_i)^2$, donde k es el número de clústers, $|G_i|$ es el número de muestras del grupo $G_i$, $\mu_i$ es el centroide del i-ésimo grupo $G_i$ y $\mu$ es la media de todo el conjunto de datos.Cuanto mayor sea el número, más separación habrá entre los grupos. Como ocurría en el caso del índice SSW.
+
+También existe el índice de Davies Bouldin, pero no se ha detallado su funcionamiento y tampoco se ha implementado, porque sino el ejercicio sería muy largo.
+
+Teniendo en cuenta los resultados que hemos obtenido, hemos podido ver, que han sido gracias a la elección de k=2 clústeres, y esto se debe a que el coeficiente de silhouette para dicho valor de k, era el mayor. Los valores del coeficiente de silhouette que se obtuvieron, fueron: [0, 0.6297906, 0.5600657, 0.4807907, 0.4554688, 0.4963372, 0.4897211, 0.4407362, 0.4907913, 0.5088615] haciendo la media de todos los valores (sin tener en cuenta el primer coeficiente, ya que este es el asociado a k = 1) obtenemos que la media es de 0.5. Esta cifra no está para nada mal, teniendo en cuenta que el coeficiente de Silhouette puede ir desde -1 hasta 1. No obstante, y como no puede ser de otra manera, es obvio que este valor puede ser mejorable.
+
+Ahora vamos a calcular las métricas de SSW y de SSB, primero vamos con SSW.
+
+```{r}
+set.seed(6543) # Establecemos la semilla
+k=2
+app_rec_kmeansk2_norm <- kmeans(df_app_rec_kmeans_fin_norm, centers = k)
+
+# obtenemos la suma de los cuadrados 
+app_rec_kmeansk2_norm$within
+```
+
+Repetimos el proceso pero para SSB.
+
+```{r}
+set.seed(6543) # Establecemos la semilla
+
+# Calcular la distancia euclidiana al cuadrado entre cada centroide y el centroide general
+distancias_cuadradas_entre <- apply(app_rec_kmeansk2_norm$centers, 1, function(x) sum((x - colMeans(df_app_rec_kmeans_fin_norm))^2))
+
+# Calcular la SSB sumando las distancias cuadradas entre
+ssb <- sum(distancias_cuadradas_entre * table(app_rec_kmeansk2_norm$cluster))
+
+# Imprimir el valor de SSB
+print(paste("Valor de SSB:", ssb))
+
+# comprobamos el cálculo anterior
+app_rec_kmeansk2_norm$betweenss
+
+```
+
+Como se puede observar, se obtiene un valor de SSB alto. Esto puede significar muchas cosas, por ello, lo importante es contextualizar este valor, con las características del juego de datos. Lo primero que hay que decir, es que el valor de SSB depende del número de muestras, por lo que si SSB es aproximadamente 6551 y el juego de datos tiene 6715 registros, entonces, la dispersión total entre los centroides de los clústeres formados por cada uno de los 6715 registros, es de 6551 unidades cuadradas.
+
+No obstante, para poder contextualizar mejor el resultado, tenemos que relacionar los valores de SSB y de SSW.
+
+A partir de los valores obtenidos de SSW y de SSB, podemos calcular la fracción de variabilidad explicada. Como hemos obtenido dos valores de SSW, entonces obtendremos dos valores de dicha fracción. Por definición, esta fracción viene definida en el intervalo de 0 y 1, por lo tanto, sea $\phi$ la fracción de variabiliad, por definición tendremos que: $\phi \in [0,1]$. Matemáticamente, esta fracción se calcula como sigue $\phi = \frac{SSB}{SSB+SSW}$, como en nuestro caso tenemos que $SSB = 6551.02239305399$ y que $SSW \in [14146.20, 12872.78]$ tendremos dos valores de $\phi$.
+
+$$
+\phi_1 = \frac{6551}{6551+14146.20} = 0.3165
+$$
+
+Ahora el segundo valor:
+
+$$
+\phi_2 = \frac{6551}{6551+12872.78} = 0.3373
+$$
+
+Estos dos valores, representan la proporción de la variabilidad total en nuestro juego de datos, que a su vez viene explicada por la separación entre clústeres. Cuanto más cercano a 1 sea el valor de $\phi$ $\forall \phi \in [\phi_1, \phi_2]$, mejor será el modelo de k-means en términos de separación entre clústeres.
+
+Como podemos observar, se obtiene una fracción de variabilidad explicada del 34% aproximadamente (cogiendo el mejor caso). Aunque este valor va desde el 0% hasta el 100%, obtener un 34% tampoco es que sea un mal resultado, simplemente podría indicar una separación moderada entre clústeres. Este resultado depende al 100 % de los datos, y es que, hay que destacar, que no hay una gran diferenciación en cuanto a clases dentro de los datos. Esto quiere decir, que a partir de los datos, resulta un tanto difícil categorizar los registros, teniendo en cuenta además, que como vimos en la PAC1, a pesar de que estas 4 variables sean las que más relación guardan entre ellas, en términos de correlación, y ser las mejor representadas dentro del juego de datos total, la correlación que existe entre ellas tampoco es muy alta, por ello podríamos obtener un resultado tan moderado.
+
+La verdad que comparando el coeficiente de silhouette para k=2, i.e., 0.6 con la fracción de variabilidad explicada obtenida 0.34, vemos como hay una diferencia de 0.26. Esta es una diferencia notable, pero esto tiene sentido, ya que el coeficiente de silhouette, se centra en determinar cuanto de similar es un objeto a su propio clúster, mientras que la fracción de variabilidad explicada indica la separación entre clústeres. Por lo que es perfectamente compatible que los clústeres tengan una separación moderada entre ellos (debido al juego de datos) y que los objetos que pertenezcan a dicho clúster sean similares al propio clúster (medida de cohesión)
+
+### Se comentan las conclusiones.
+
+Para terminar este primer ejercicio, hay que destacar varios aspectos que ya se mencionaron en la PEC2 y que son importantes.
+
+-   **Normalizar** el juego de datos, antes de aplicar el algoritmo de los k-means. Como hemos explicado antes, esto es muy importante, ya que de esta manera evitamos que el algoritmo sufra los imprevistos de las diferencias tan grandes de escalas, que existen a la hora de relacionar dos variables.
+
+-   **Semilla aleatoria**. Aunque un buen resultado no depende al 100% de ello, establecer la semilla aleatoria correcta, nos puede auydar a encontrar antes el resultado óptimo, e incluso puede evitar que pensemos que el algoritmo no funciona para un determinado juego de datos, cuando simplemente lo que este necesita, sea un comienzo determinado dado por la semilla aleatoria.
+
+Cabe destacar, que en este caso, los únicos resultados aceptables son los obtenidos para k=2, no solo por sus buenos números, sino tambíen por el número de clústers, pues hay que recordar que nuestra tarea de clasificación es binaria, por lo que implementar el algoritmo o desplegar una solución con K=3 clústers, puede que no tenga mucho sentido.
+
+Se ha podido ver además como algunos métodos no han sido efectivos a la hora de determinar el nº de clústers, como el criterio de Calinski-Harabasz, ya que este determinaba que el nº de clústers podía ser 9, mientras que los resultados anteriores y el criterio de la silueta media refutaban este resultado. Es por esto, que hay que notar como no siempre todos los métodos de cálculo van a funcionar con nuestros datos. En este caso, observando las diferencias entre los dos criterios (silueta media y Calinski-Harabasz) podemos ver porque el último no arroja buenos resultados, y es que el índice de Calinski-Harabasz se centra en la varianza entre y dentro de los clústeres, buscando la máxima relación. Mientras que el criterio de la silueta media, basa su cálculo en la comparación de las distancias promedio entre puntos dentro del mismo clúster y en diferentes clústeres. En definitiva, mientras que el índice de Calinski-Harabasz evalúa la cohesión y la separación general, el coeficiente de silueta se centra en cuanto de bien se asignan los puntos a sus respectivos clústeres en términos de proximidad relativa.
+
+Finalmente, hemos podido obtener muy buenos resultados con k=2 clústeres, pues así lo demuestran las gráficas comparativas anteriores, y el coeficiente de silhouette, mostrando una cohesión considerable (0.6). Culminamos diciendo que el algoritmo de k-means ha realizado un buen trabajo en nuestro juego de datos, no obstante, hay que tener cuidado, ya que la separación entre clústeres obtenida es relativamente moderada.
+
+------------------------------------------------------------------------
+
+## Ejercicio 2
+
+### Se genera de nuevo el modelo no supervisado anterior, pero usando una métrica de distancia distinta.
+
+Ya hemos implementado el algoritmo **k-means** en el anterior apartado, pero ahora a fin de investigar cuanto y como influye el tipo de distancias calculadas, para la clasificación de los datos, vamos a implementar el mismo algoritmo, pero con un tipo de distancia diferente al anterior. Esto quiere decir, que el algoritmo clasificará los datos introducidos mediante el uso de una fórmula de distancias, diferente al del ejercicio anterior. Para poder hacer esto, hemos hecho uso de la librería: `flexclust`
+
+EL cálculo de la distancia que vamos a implementar es el propuesto por Prsaanta Chandra Mahalanobis, y es la distancia de Mahalanobis. Por teoría, sabemos que esta distancia corrige la distorsión provocada por la correlación de las variables. En nuestro caso, al tener un espacio de dos dimensiones con un conjunto de puntos de varianza $\sigma^{2}(X)$, $\sigma^{2}(Y)$ y covarianza $cov(X,Y)$, la distancia de Mahalanobis, vendrá dada por la siguiente expresión:
+
+$$
+d_{Mahalanobis} = \sqrt{(x_1 - y_1 , x_2 - y_2) \begin{bmatrix}
+    \sigma^2 (X) & cov(X,Y) \\
+    cov(Y,X) & \sigma^2(Y) \\
+  \end{bmatrix}^{-1}(x_1 - y_1 , x_2 - y_2) }
+$$
+
+Sabiendo esto. implementamos la función de `mahalanobis(·)` que hay en R, que devuelve el cuadrado de la distancia de Mahalanobis de todas las filas y del vector $\mu = center$ respecto a la covarianza $\Sigma = cov$.
+
+```{r}
+# Instalar y cargar el paquete cluster
+# install.packages("cluster")
+library(cluster)
+# Calcular la matriz de distancia de Mahalanobis
+mahalanobis_dist_matrix <- mahalanobis(df_app_rec_kmeans_fin_norm, center = colMeans(df_app_rec_kmeans_fin_norm), cov = cov(df_app_rec_kmeans_fin_norm))
+cat('Este es el tipo de variable que es mahalanobis_dist_matrix: ', class(mahalanobis_dist_matrix))
+
+# Realizar el clustering con kmeans usando la matriz de distancia de Mahalanobis
+k <- 2 # Número de clústeres deseado
+set.seed(6543)  # Semilla para reproducibilidad
+app_rec_kmeansk2_norm2 <- kmeans(mahalanobis_dist_matrix, centers = k, iter.max = 100)
+
+# Visualizar los resultados
+# print(app_rec_kmeansk2_norm2)
+
+# ahora vamos a represntar los resultados
+# Salario anual y días hasta el cumpleaños
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y target
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días empleado y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hastael cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+# app_rec_kmeansk2[c(1,2,3,4,5)]
+```
+
+Como pocemos comprobar, con k=2 la distancia de mahalanobis no consigue buenos resultados, que permitan clasificar correctamente los registros. De hecho, las únicas muestras, que el algoritmo es capaz de clasificar en una clase diferente, son las que más lejos se encuentran de la concentración principal de muestras. De hecho, podríamos decir, que algunas de estas muestras podrían considerarse: muestras outliers, ya que hay algunas que están muy alejadas. pero como en este casos no son muchas, no hará falta que las eliminemos. Por lo tanto, se podría decir, que en algunos casos, el algoritmo solo está clasificando diferentemente las muestras *ouliers*.
+
+Teniendo en cuenta, que para dos clústeres no se clasifican correctamente las muestras, vamos a repetir el proceso, pero para para tres clústeres. Véase el siguiente *chunk*
+
+```{r}
+# Instalar y cargar el paquete cluster
+# install.packages("cluster")
+library(cluster)
+
+# Calcular la matriz de distancia de Mahalanobis
+mahalanobis_dist_matrix <- mahalanobis(df_app_rec_kmeans_fin_norm, center = colMeans(df_app_rec_kmeans_fin_norm), cov = cov(df_app_rec_kmeans_fin_norm))
+
+# Realizar el clustering con kmeans usando la matriz de distancia de Mahalanobis
+k <- 3 # Número de clústeres deseado
+set.seed(6543)  # Semilla para reproducibilidad
+app_rec_kmeansk2_norm2 <- kmeans(mahalanobis_dist_matrix, centers = k, iter.max = 100)
+
+# Visualizar los resultados
+# print(app_rec_kmeansk2_norm2)
+
+# ahora vamos a represntar los resultados
+# Salario anual y días hasta el cumpleaños
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=3")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=3")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=3")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y target
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=3")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=3")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=3")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días empleado y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=app_rec_kmeansk2_norm2$cluster, main="Clasificación k-means con k=3")
+# Salario anual y días hastael cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+# app_rec_kmeansk2[c(1,2,3,4,5)]
+```
+
+Podemos ver claramente una mejoría en cuanto a los resultados, según hemos aumentado el número de clústeres a 3, no obstante, tampoco son resultados excelentes, puesto que pueden verse diferencias a simple vista cuando uno compara la gráfica de clasificación de los k-means con la gráfica real.
+
+En el caso de la gráfica referente al salario anual y los días que quedan para el cumpleaños del empeado, podemos ver una clasificación aceptable, no obstante, se obsertvan algunas muestras clasificadas erróneamente. Para la siguiente gráfica, i.e., (salario anual & días empleado) vemos como para los valores mñas negaticos de la variable `DAYS_EMPLOYED` las muestras se clasifican erróneamente, ya que deberían de ser de color verde, pues el color verde en la gráfica de clasificación de los k-means, se corresponde con el color negro en la gráfica de las muestras "reales". Este mismo comportamiento es observable en la gráfica correspondiente al par de variables: `DAYS_EMPLOYED` y `DAYS_BIRTHDAY`. Esto podría deberse a que el método de distancia utilizado (Mahalanobis) tiene en cuenta la densidad del espacio muestral, y por eso esas zonas las clasifica erróneamente, De hecho, la definición de este término, responde con lo que se ha visto en teoría, acerca de este método, ya que los puntos que se encuentran en una zona densamente poblada deberían considerarse más cercanos entre ellos que con respecto a puntos fuera de esta zona de mayor densidad.
+
+Por último, en la gráfica correspondiente al par de variables `CNT_CHILDREN` y `AMT_INCOME_TOTAL` podemos observar una clasificación mejor que el resto, pero aun así, la clasificación de registros en esta gráfica, sigue teniendo errores perceptibles.
+
+Ahora, introducido este ejemplo, vamos a realizar el cálculo pero para otra distancia. Véase el siguiente chunk de código.
+
+```{r}
+# app_rec_kmeans_fin[c(1,2)]
+k=2
+set.seed(1000)
+# 6543
+app_rec_kmeansk2_norm_MAC <- kmeans(df_app_rec_kmeans_fin_norm, k, algorithm = "MacQueen")
+
+# Salario anual y días hasta el cumpleaños
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=app_rec_kmeansk2_norm_MAC$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,2)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=app_rec_kmeansk2_norm_MAC$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=app_rec_kmeansk2_norm_MAC$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Salario anual y target
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=app_rec_kmeansk2_norm_MAC$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(1,5)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y días empleado
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=app_rec_kmeansk2_norm_MAC$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,3)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días hasta el cumpleaños y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=app_rec_kmeansk2_norm_MAC$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hasta el cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(2,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+
+# Días empleado y cantidad de hijos
+par(mfrow = c(1,2))
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=app_rec_kmeansk2_norm_MAC$cluster, main="Clasificación k-means con k=2")
+# Salario anual y días hastael cumpleaños (REAL)
+plot(df_app_rec_kmeans_fin_norm[c(3,4)], col=as.factor(df_app_rec_kmeans_fin_norm$target), main="Clasificación real")
+# app_rec_kmeansk2[c(1,2,3,4,5)]
+```
+
+Como podemos comprobar, con el algoritmo de MacQueen, también obtenemos un buen resultado. Nótese, como al cambiar el tipo de algoritmo, el cálculo de la distancia también cambia. Por defecto, la función de k-means implementa el algoritmo Hartigan-Wong, y como podemos comprobar por los resultados obtenidos con el algoritmo de MacQueen, podemos decir que ambos arrojan resultados muy buenos y altamente similares.
+
+En el siguiente apartado, se evaluarán las métricas que permiten determinar la calidad de la clasificación efectuada por los algoritmos.
+
+### Se muestran y comentan las medidas de calidad del modelo generado.
+
+Para poder determinar la calidad del modelo que se ha desplegado, tendremos que fijarnos en los coeficientes de silhouette, y en las métricas que hemos definido en el primer ejercicio, y que eran: SSW y SSB.
+
+Ahora vamos a calcular las métricas de SSW y de SSB para el cálculo con Mahalanobis, primero vamos con SSW.
+
+```{r}
+set.seed(6543) # Establecemos la semilla
+
+# Calcular la matriz de distancia de Mahalanobis
+mahalanobis_dist_matrix <- mahalanobis(df_app_rec_kmeans_fin_norm, center = colMeans(df_app_rec_kmeans_fin_norm), cov = cov(df_app_rec_kmeans_fin_norm))
+
+# Realizar el clustering con kmeans usando la matriz de distancia de Mahalanobis
+k <- 3 # Número de clústeres deseado
+set.seed(6543)  # Semilla para reproducibilidad
+
+app_rec_kmeansk2_normm <- kmeans(mahalanobis_dist_matrix, centers = 2, iter.max = 100)
+app_rec_kmeansk3_normm <- kmeans(mahalanobis_dist_matrix, centers = 3, iter.max = 100)
+
+# obtenemos la suma de los cuadrados 
+cat('Este es el resultado de SSW para k=2: ',app_rec_kmeansk2_normm$within)
+cat('\nEste es el resultado de SSW para k=3: ',app_rec_kmeansk3_normm$within)
+```
+
+Como podemos comprobar, para k = 2, hemos obtenido solo dos valores, pues solo hay 2 clústers, mientras que para k=3 hemos obtenido tres valores. Ahora se repite el mismo proceso, pero esta vez para calcular SSB.
+
+```{r}
+set.seed(6543) # Establecemos la semilla
+
+# comprobamos el cálculo anterior
+cat('SSB para k=2: ',app_rec_kmeansk2_normm$betweenss)
+
+#-----AHORA REPETIMOS EL CÁLCULO PARA k=3-----#
+
+# comprobamos el cálculo anterior
+cat('\nSSB para k=3: ',app_rec_kmeansk3_normm$betweenss)
+```
+
+Teniendo en cuenta que ya hemos obtenido los valores, vamos a calcular las fracciones de variabilidad explicadas:
+
+Tenemos dos grupos de valores, aquellos obtenidos para k=2 y para k=3. Primero vamos a calcular los valores de la fracción de variabilidad explicada para los valores de SSW y SSB obtenidos con k=2.
+
+$$
+\phi_{1,k=2} = \frac{336538.2}{336538.2+189682.9} = 0.64
+$$
+
+Ahora, calculamos la segunda tanda de valores.
+
+$$
+\phi_{2,k=2} = \frac{336538.2}{336538.2+59232.39} = 0.85
+$$
+
+Ya tenemos los resultados para k=2, ahora vamos a calcular los resultados para k=3
+
+$$
+\phi_{1,k=3} = \frac{421964.6}{421964.6+85437.07} = 0.831 
+$$
+
+Ahora, calculamos la segunda tanda de valores.
+
+$$
+\phi_{2,k=3} = \frac{421964.6}{421964.6+18819.5} = 0.957
+$$
+
+Ahora, calculamos la tercera tanda de valores.
+
+$$
+\phi_{3,k=3} = \frac{421964.6}{421964.6+59232.39} = 0.876
+$$
+
+Como podemos observar, obtenemos métricas mucho mayores en compararción a las obtenidas. En este caso, que las métricas sean mucho mayores que las anteriores, significa que el modelo o las variables consideradas explican en mayor porcentaje, la variabilidad total de nuestro juego de datos. Generalmente, esto se considera un buen resultado, ya que esta variable está comprendida entre 0 y 1. La verdad que resulta un poco extraño que esta métrica sea mayor cuando los resultados de clasificación no son mucho mejores que los obtenidos para el anterior ejercicio. Esta claro que la semilla aleatoria juega un papel muy importante, y puede que en el primer ejercicio diésemos con la semilla aleatoria perfecta, que arrojáse los mejores resultados gráficos, pero en el anterior ejercicio pudimos demostrar que existía una cohesión considerable, ya que el coeficiente de silhouette era de 0.6.
+
+Por regla general, comparando los valores obtenidos de SSW y de SSB para k=2 y para k=3, vemos como para k=3, los valores obtenidos son mejores, ya que son cifras más altas. Esto casa con los resultados gráficos obtenidos anteriormente, donde pudimos ver con claridad, como la tarea de clasificación para k=2 clústeres, no era del todo acertada, mientras que para k=3, los resultados eran infinitamente mejores, pero con el handicap de introducir un clúster no necesario, ya que nuestro juego de datos se supone que contenpla solo dos tipos de clientes.
+
+Para salir de dudas, ahora vamos a clacular el coeficiente de Silhouette. Tanto para k=3, como para k=2
+
+```{r}
+set.seed(6543)
+library(fpc)
+library(cluster)
+
+# Calcular la matriz de distancia de Mahalanobis
+mahalanobis_dist_matrix <- mahalanobis(df_app_rec_kmeans_fin_norm, center = colMeans(df_app_rec_kmeans_fin_norm), cov = cov(df_app_rec_kmeans_fin_norm))
+
+# para k=2
+app_rec_kmeansk2_normm2 <- kmeans(mahalanobis_dist_matrix, centers = 2, iter.max = 100)
+cluster2 <- app_rec_kmeansk2_normm2$cluster
+#skk2      <- silhouette(cluster2, dist(mahalanobis_dist_matrix))
+silhouette_statsk2 <- cluster.stats(mahalanobis_dist_matrix, cluster2)
+cat("\nCoeficiente de Silhouette promedio para k=2 :", mean(silhouette_statsk2$avg.silwidth), "\n")
+
+# para k=3
+app_rec_kmeansk3_normm3 <- kmeans(mahalanobis_dist_matrix, centers = 3, iter.max = 100)
+cluster3 <- app_rec_kmeansk3_normm3$cluster
+#skk3      <- silhouette(cluster3, mahalanobis_dist_matrix)
+silhouette_statsk3 <- cluster.stats(mahalanobis_dist_matrix, cluster3)
+cat("\nCoeficiente de Silhouette promedio para k=3 :", mean(silhouette_statsk3$avg.silwidth), "\n")
+```
+
+Como podemos ver, son coeficientes mucho peores, en comparación a los que obtuvimos en el ejercicio anterior. Hay que recordar que el coeficiente de silhouette iba de -1 a 1, pasando por 0, por lo tanto, en este caso, al tener dos coeficientes negativos de -0.1085067 y -0.2148189, podemos decir, que estos se encuentran más cerca de 0 que de los dos otros extremos. Esto en términos prácticas, significa que la observación está en el límite entre dos clústeres pero que lo más probable es que esté mal ajustada a su propio clúster y bien ajustada a clústeres vecinos, ya que es un número negativo pero cercano a 0.
+
+Comparando el valor del coeficiente de silhouette para k=2 con el obtenido para k=3, vemos como el resultado es mejor para k=2, algo que choca un poco, sabiendo que obtuvimos mejores resultados de clasificación para k=3 que para k=2. No obstante, en el anterior ejercicio, el mejor coeficiente de silhouette obtenido, fue el relativo a k=2, por lo tanto, en este ejercicio estaríamos confirmando la idealidad de tener solo dos clústeres.
+
+Ahora vamos a realizar los cálculos para el algoritmo de MacQueen. Véase en el siguiente *chunk* las dos sumas SSW y SSB, así como el cálculo del coeficiente de Silhouette.
+
+```{r}
+k=2
+set.seed(1000)
+app_rec_kmeansk2_norm_MAC <- kmeans(df_app_rec_kmeans_fin_norm, k, algorithm = "MacQueen")
+MAC_cluster <- app_rec_kmeansk2_norm_MAC$cluster
+MACsk <- silhouette(MAC_cluster, dist(df_app_rec_kmeans_fin_norm))
+cat("\n El coeficiente de Silhouette para k=2 es: ", mean(MACsk[,3]))
+
+#visualizamos los clústeres
+clusplot(df_app_rec_kmeans_fin_norm, MAC_cluster, color=TRUE, shade=TRUE, labels=2, lines=0)
+
+# ahora calculamos las sumas
+
+# obtenemos la suma de los cuadrados (SSW)
+MAC_SSW = app_rec_kmeansk2_norm_MAC$within
+cat('\nEste es el resultado de SSW para k=2: ',MAC_SSW)
+
+# ahora calculamos el valor de SSB
+MAC_SSB = app_rec_kmeansk2_norm_MAC$betweenss
+cat('\nEste es el resultado de SSB para k=2: ',MAC_SSB)
+
+# ahora calculamos los dos valores de la fracción de variabilidad explicada
+phi_1 = (MAC_SSB)/(MAC_SSB + MAC_SSW[1])
+phi_2 = (MAC_SSB)/(MAC_SSB + MAC_SSW[2])
+  
+cat("\nEste es el valor de phi_1: ",phi_1)
+cat("\nEste es el valor de phi_2: ",phi_2)
+```
+
+Como podemos comprobar, el coeficiente de silhouette, no es igual de bueno que el obtenido en el anterior, de hecho, es casí la mitad, ya que en este caso el coeficiente obtenido para k=2 y para el algoritmo de MacQueen es de 0.37, frente al 0.63 del anterior ejercicio. Además, por la gráfica de los clústeres, podemos ver, que los dos clústeres son solo capaces de explicar la mitad de la variabilidad de los puntos.
+
+Respecto a los valores de SSW y de SSB obtenidos, y de la fracción de variabilidad explicada, vemos como los resultados respecto a la distancia de Mahalanobis son un poco peores, ya que en el mejor de los casos, se obtiene una fracción de variabilidad explicada de 0.6367. Esto significa que aproximadamente el 64% de la variabilidad total en los datos ha sido explicada por el modelo de clústeres que hemos ajustado y cuanto más alto sea este valor, más efectivo es el modelo. Para el otro valor de SSW, se obtiene un valor mucho más bajo, i.e., 0.23.
+
+Ahora bien, el 64% de variabilidad de datos, contrasta con el casi 50% que se muestra en la gráfica, puede que esto se deba a los modos de cálculo de estas dos variables.
+
+### Adicionalmente se comparan los dos modelos no supervisados con métricas de distancia distintas.
+
+Como se ha podido comprobar, se han obtenido mejores resultados en el primer ejercicio, que en este segundo ejercicio. Como se ha mencionado a lo largo del desarrollo de este ejercicio, la distancia de mahalanobis tiene la peculiaridad de tener en cuenta la densidad del conjunto muestral, y está claro que esta medida no afecta positivamente al conjunto de registros que se quieren clasificar, todo lo contrario. Hemos podido ver como el coeficiente de silhouette en el primer ejercicio era de aproximadamente 0.63, mientras que aquí el coeficiente es negativo, por lo que se observa una diferencia notable. Y sin ninguna duda, prima el primer modelo ante el segundo.
+
+En cuanto a las medidas de SSB y de SSW, en este caso hemos podido ver como hemos obtenido mejores marcas, pero tampoco se debería de tomar en cuenta estos datos como altamente vinculantes, porque el coeficiente de silhouette que hemos obtenido es muy bajo, y esto se debe principalmente a que este cálculo de distancias, penaliza la clasificación de los resgistros de nuestro juegos de datos.
+
+### Se comentan las conclusiones.
+
+Se ha visto claramente, como los resultados obtenidos para la métrica de distancia `daisy` son mucho mejores, que para las resultados obtenidos con la distancia calculada mediante el método de Mahalanobis. Podríamos decir que estos peores resultados de clasificación, se deben principalmente a que la ditancia estipulada por Mahalanobis, contempla la densidad del espacio muestral, lo que directamente afecta a la clasificación, determinándola según la densidad de algunas zonas. Esto es algo negativo, en nuestro caso, sabiendo que no hay grandes correlaciones entre las variables mejor representadas y que la tarea de clasificación que se quiere acometer no es tan fácil, ya que los datos no resultan tan obvios para los modelos, como para que estos sepan rápidamente si un cliente es de riesgo alto o bajo, viendo los valores de sus atributos (variables/columnas) Por lo tanto, al haber muchos registros, y no siendo tan obvios los datos, clasificar los datos dependiendo de la densidad de muestras en algunas zonas, puede llegar a ser un problema.
+
+------------------------------------------------------------------------
+
+## Ejercicio 3
+
+En este ejercicio, nos centraremos en la aplicación de algoritmos como el DBSCAN y el OPTICS, ya estudiados en teoría, e implementados en la PEC2
+
+### Se aplican lo algoritmos DBSCAN y OPTICS de forma correcta.
+
+Como ya sabemos por teoría, estos dos algoritmos son algoritmos de clasificación no supervisados, al igual que el algoritmo de los k-means. A continuación, se hace un pequeño resumen de estos dos algoritmos que vamos a implementar en este ejercicio.
+
+El algoritmo **DBSCAN** precisa de dos parámetros; $\varepsilon$ que determina el radio máximo de cercanía entre dos puntos, y el valor **minPTS** que se refiere al mínimo número de puntos que rodean a un punto en concreto en un radio $\varepsilon$. Así pues, este algoritmo irá contruyendo esferas con radio $\varepsilon$ con **minPTS** puntos. La dinámica de este algoritmo implica dos variables más; $q_{alcanzable}$ y $q_{núcleo}$. El $q_{núcleo}$ es un punto p cualquiera, que tiene **minPTS** a una distancia ≤ $\varepsilon$. Por último, $q_{alcanzable}$ hace referencia a un punto p cualquiera, al cual se puede acceder por medio de una senda de $q_{núcleo}$. Cualquier punto no alcanzable se denomina outlier.
+
+Una de las ventajas de este algoritmo reside en el potencial que tiene en la búsqueda de valores extremos y es capaz de lidiar con clústeres de distintas formas geométricas. Además este algoritmo no necesita conocer previamente el número de clústers. Pero una de las semejanzas que guarda con el algoritmo de **k-means**, es que hay que acertar a la hora de darles valor a las variables $\varepsilon$ y **minPTS** y esto requierer de experiencia en la materia.
+
+El algoritmo **OPTICS** resuelve el problema de las variables iniciales, visto en el anterior algoritmo con $\varepsilon$ y **minPTS** y en el algoritmo **k-means** con el número de clústers **k**. Esto no significa que el programdor/científico de datos, no tenga que especificar ninguna variable, pues en este algoritmo hay que especificar un radio $\varepsilon_{OPTICS}$, pero a diferencia del anterior algoritmo, este parámetro no influirá en cuanto a dinámica fundamental del algoritmo, como hacían los parámetros **k**, $\varepsilon_{DBSCAN}$ y **minPTS**, sino que aumentará o disminuirá la complejidad de esos cálculos. Es por esto, que el algoritmo **OPTICS** no genera clústers, sino que lleva a cabo una ordenación de puntos según la **distancia de alcanzabilidad** ($d_{reach}$). Esta distancia se cálcula de la siguiente manera; $d_{reach} := min(d_{nucleo},d(p,q))$ dónde por teoría se sabe que $d:p,q \rightarrow \mathbb{R} \hspace{3mm} \forall p,q \in \mathbb{R}^2$. La dinámica de este algoritmo, consiste principalmente en asignar a cada punto del juego de datos, una $d_{reach}$.
+
+Para poder trabajar con estos dos algoritmos, primero tendremos que cargar la librería necesaria.
+
+```{r}
+if (!require('dbscan')) install.packages('dbscan')
+library(dbscan)
+```
+
+Una vez ya hemos cargado la librería, ya estamos en condiciones de aplicar los dos algoritmos, al conjunto de datos normalizados. Pero antes, tenemos que crear las observaciones necesarias.
+
+```{r}
+set.seed(6543)
+
+# quitamos la columna target, porque no la necesitamos
+# df_app_rec_kmeans_fin_norm_optDbscan = df_app_rec_kmeans_fin_norm[,-ncol(df_app_rec_kmeans_fin_norm)]
+# summary(df_app_rec_kmeans_fin_norm_optDbscan)
+
+# creamos una lista donde guardaremos los resultados de las observaciones
+resultados_observaciones <- list()
+combinaciones <- combn(c("AMT_INCOME_TOTAL", "DAYS_BIRTH", "DAYS_EMPLOYED", "CNT_CHILDREN"), 2)
+print(combinaciones[, ])
+
+for (i in 1:ncol(combinaciones)) {
+  etiqueta1 <- combinaciones[1, i]
+  etiqueta2 <- combinaciones[2, i]
+  cat("\n\nObservación para el par de atributos: ", etiqueta1, etiqueta2)
+  # Utilizar [[]] para extraer las columnas del dataframe
+  observaciones <- optics(df_app_rec_kmeans_fin_norm[, c(etiqueta1, etiqueta2)], minPts = 5)
+  resultados_observaciones[[i]] <- observaciones
+  cat("\n")
+  print(resultados_observaciones[[i]])
+}
+```
+
+Estudiando las observaciones que se han obtenido, puede verse, como la observación con el valor de $\varepsilon$ más pequeño es para el par ( DAYS_BIRTH & DAYS_EMPLOYED ) ya que $\varepsilon = 0.685$. Ahora, la pregunta es, ¿que significa que $\varepsilon$ sea grande o pequeño? En el caso de que $\varepsilon$ sea grande, significaría, que los puntos que se considerarían como que están "lejos" quedarían conectados, ahora bien, si $\varepsilon$ es pequeño, entonces significa que los puntos quedarían conectados solo en el caso de estar muy cerca unos de otros. Es por esto, que las observaciones con un menor valor de $\varepsilon$ nos resultan más interesantes.
+
+Ahora vamos a llevar a cabo las representaciones:
+
+```{r}
+set.seed(6543)
+puntos = 5
+
+#Par DAYS_BIRTH-DAYS_EMPLOYED
+par(mfrow = c(1,2))
+observaciones_birth_employed <- optics(df_app_rec_kmeans_fin_norm[c("DAYS_BIRTH","DAYS_EMPLOYED")],minPts = puntos)
+plot(observaciones_birth_employed, main = 'Diagrama de alcance: DAYS_BIRTH-DAYS_EMPLOYED')
+plot(df_app_rec_kmeans_fin_norm[c("DAYS_BIRTH","DAYS_EMPLOYED")], col = "grey")
+polygon(df_app_rec_kmeans_fin_norm[c("DAYS_BIRTH","DAYS_EMPLOYED")][observaciones_birth_employed$order,])
+
+#Par AMT_INCOME_TOTAL-DAYS_EMPLOYED
+par(mfrow = c(1,2))
+observaciones_amt_employed <- optics(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","DAYS_EMPLOYED")],minPts = puntos)
+plot(observaciones_amt_employed,  main = 'Diagrama de alcance: AMT_INCOME_TOTAL-DAYS_EMPLOYED')
+plot(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","DAYS_EMPLOYED")], col = "grey")
+polygon(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","DAYS_EMPLOYED")][observaciones_amt_employed$order,])
+
+#Par AMT_INCOME_TOTAL-DAYS_BIRTH
+par(mfrow = c(1,2))
+observaciones_amt_birth <- optics(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","DAYS_BIRTH")],minPts = puntos)
+plot(observaciones_amt_birth,  main = 'Diagrama de alcance: AMT_INCOME_TOTAL-DAYS_BIRTH')
+plot(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","DAYS_BIRTH")], col = "grey")
+polygon(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","DAYS_EMPLOYED")][observaciones_amt_birth$order,])
+
+#Par AMT_INCOME_TOTAL-CNT_CHILDREN
+par(mfrow = c(1,2))
+observaciones_amt_children <- optics(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","CNT_CHILDREN")],minPts = puntos)
+plot(observaciones_amt_children,  main = 'Diagrama de alcance: AMT_INCOME_TOTAL-CNT_CHILDREN')
+plot(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","CNT_CHILDREN")], col = "grey")
+polygon(df_app_rec_kmeans_fin_norm[c("AMT_INCOME_TOTAL","CNT_CHILDREN")][observaciones_amt_children$order,])
+
+#Par DAYS_EMPLOYED-CNT_CHILDREN
+par(mfrow = c(1,2))
+observaciones_emp_children <- optics(df_app_rec_kmeans_fin_norm[c("DAYS_EMPLOYED","CNT_CHILDREN")],minPts = puntos)
+plot(observaciones_emp_children,  main = 'Diagrama de alcance: DAYS_EMPLOYED-CNT_CHILDREN')
+plot(df_app_rec_kmeans_fin_norm[c("DAYS_EMPLOYED","CNT_CHILDREN")], col = "grey")
+polygon(df_app_rec_kmeans_fin_norm[c("DAYS_EMPLOYED","CNT_CHILDREN")][observaciones_emp_children$order,])
+
+#Par DAYS_BIRTH-CNT_CHILDREN
+par(mfrow = c(1,2))
+observaciones_children_birth <- optics(df_app_rec_kmeans_fin_norm[c("DAYS_BIRTH","CNT_CHILDREN")],minPts = puntos)
+plot(observaciones_children_birth,  main = 'Diagrama de alcance: DAYS_BIRTH-CNT_CHILDREN')
+plot(df_app_rec_kmeans_fin_norm[c("DAYS_BIRTH","CNT_CHILDREN")], col = "grey")
+polygon(df_app_rec_kmeans_fin_norm[c("DAYS_BIRTH","CNT_CHILDREN")][observaciones_children_birth$order,])
+```
+
+Antes de comentar los resultados, cabe destacar que se han probado con diferentes valores de minPTS y para todos los valores, obteníamos resultados similares, por ello se ha decidido realizar las simulaciones con minPTS=5, pues con este valor de minPTS obtuvimos los valores de $\varepsilon$ más bajos, para cada par de variables.
+
+Como podemos observar, la primera gráfica, presenta resultados de mucha menor magnitud en cuanto a la distancia de alcanzabilidad (eje y) en comparación con las dos siguientes.
+
+Las colinas que se observan en las tres últimas gráficas, hacen referencia a las muestras que se encuentran entre los clústers, esto quiere decir que hay muestras "inter-clúster" a distancias de alcanzabilidad muy bajas. Luego, siempre que hay una cima, hay dos valles, uno a cada lado, según la profundidad de los valles, se podrá inferir la densidad del clúster. Esto, en términos prácticos, significa que cuanto más profundo sea el valle, más denso será el clúster, pues la distancia entre muestras será menor, esto puede verse en el eje Y de la gráfica de arriba. Teniendo este concepto en cuenta, podríamos decir que para los pares (AMT_INCOME_TOTAL & CNT_CHILDREN) (DAYS_EMPLOYED & CNT_CHILDREN) y (DAYS_BIRTH & CNT_CHILDREN), se observan 3 clústeres principales con una población mediana, ya que las colinas no tienen una distancia de alcanzabiidad muy alta. Este resultado tiene mucho sentido, si observamos la gráfica de la derecha en cada uno de estos tres últimos pares, que nos permite observar las distancias entre puntos cercanos, trazadas dentro del mismo clúster e incluso entre clústeres diferentes. Vemos como la variable CNT_CHILDREN (presente en las 3 últimas gráficas) es entera y hay 4 filas principales de registros, que se van posicionando a lo largo del eje x. Es por esta razón por la cual se observan 3 clústeres más diferenciados, pues los espacios en blanco que hay entre los 4 bloques de valores principales para la variable CNT_CHILDREN, vemos 3 espacios vacíos.
+
+Volviendo al primer par de variables, DAYS_BIRTH & DAYS_EMPLOYED, podemos ver como solomente hay un pico considerable con una distancia de alcanzabilidad de aproximadamente 0.45, por lo que intuimos que todo lo que hay a su izquierda se corresponde con un clúster de muestras, osea que de alguna manera, estamos viendo solamente un clúster para todo el conjunto de datos. Aunque pueda parecer raro, este resultado para el par DAYS_BIRTH & DAYS_EMPLOYED tiene sentido, ya que como pudimos ver en ejercicios anteriores, con el algoritmo k-means, las muestras de ambas clases formaban un gran clúster homogéneo, donde no se apreciaba ninguna zona típicamente más poblada por una clase u otra, ya que parecía verse como las muestras estaban esparcidas por el espacio de manera aleatoria. Esta heterogeneidad de valores (dispersos muy aleatoriamente) se justifica con la gráfica de su derecha, donde podemos ver como las distancias efectivamente son muy pequeñas.
+
+Analizando el resultado obtenido para los pares (AMT_INCOME_TOTAL & DAYS_EMPLOYED) y (AMT_INCOME_TOTAL & CNT_CHILDREN) vemos como solo hay un pico a la derecha del todo, lo que explicaría la gran homogeneidad de los clústeres que refleja la relación de estas dos variables, ya que no hay clústeres tan separados, como para que se aprecien como clústeres diferentes. Solamente se aprecian pequeñas separaciones, pero que son insignificantes y que se corresponden con las pequeñas colinas de cimas planas.
+
+Ahora que ya hemos aplicado el algoritmo de OPTICS, procedemos a aplicar el algoritmo de DBSCAN. Vamos a aplicar el algoritmo de DBSCAN. Véase el siguiente *chunk* de código:
+
+Podemos aplicar el algoritmo DBSCAN muy rápidamente de la siguiente manera.
+
+```{r}
+library(dbscan)
+
+# Aplicar el algoritmo DBSCAN
+# Establecer eps y minPts según tus necesidades
+resultados <- dbscan(df_app_rec_kmeans_fin_norm, eps = 2, minPts = 5)
+
+# Visualizar los resultados
+plot(df_app_rec_kmeans_fin_norm, col = resultados$cluster + 1, pch = 16, main = "DBSCAN Clustering")
+legend("topright", legend = unique(resultados$cluster), col = unique(resultados$cluster) + 1, pch = 16, title = "Cluster")
+```
+
+Comparando estos resultados con los obtenidos en los anteriores ejercicios, vemos similitudes en cuanto clasificación, y por lo tanto podría ser buena señal. No obstante, habría que determinar el coeficiente de Silhouette para determinar la cohesión de los clústers creados.
+
+Otra forma de aplicar el algoritmo DBSCAN, de la misma forma que se hizó en la PEC2, es la siguiente.
+
+```{r}
+set.seed(6543)
+# creamos una lista donde guardaremos los resultados de las observaciones
+resultados_observaciones <- list()
+combinaciones <- combn(c("AMT_INCOME_TOTAL", "DAYS_BIRTH", "DAYS_EMPLOYED", "CNT_CHILDREN"), 2)
+print(combinaciones[, ])
+
+for (i in 1:ncol(combinaciones)) {
+  etiqueta1 <- combinaciones[1, i]
+  etiqueta2 <- combinaciones[2, i]
+  cat("\n\nObservación para el par de atributos: ", etiqueta1, etiqueta2)
+  # Utilizar [[]] para extraer las columnas del dataframe
+  observaciones <- optics(df_app_rec_kmeans_fin_norm[, c(etiqueta1, etiqueta2)], minPts = 5)
+  result_observa <- extractDBSCAN(observaciones, eps_cl = 0.08)
+  resultados_observaciones[[i]] <- result_observa
+  cat("\n")
+  print(resultados_observaciones[[i]])
+  plot(result_observa, main=paste(etiqueta1,"&",etiqueta2))
+}
+```
+
+A simple vista, observando los resultados analíticos, si uno se fija en los valores de $\varepsilon$ puede darse cuenta como los dos últimos pares de variables: (DAYS_BIRTH & CNT_CHILDREN) y (DAYS_EMPLOYED & CNT_CHILDREN) tienen el valor de $\varepsilon$ más alto, y por lo tanto, serán los pares que menos clústers tengan. Como vimos en teoría, $\varepsilon$ representa la distancia de alcanzabilidad, por lo tanto, define la distancia a la que un punto debe de estar de otro para ser considerado parte del mismo clúster. Por ello, si la distancia entre dos puntos es menor o igual a $\varepsilon$, los dos puntos son considerados vecinos, contrariamente, son considerados puntos separados.
+
+Ahora vamos a analizar los resultados gráficos.
+
+Con estos resultados, podemos corroborar, lo que dijimos a la hora de obtener los valores de $\varepsilon$, y es que, para los valores más grandes de estsa variable, vemos como el número de clústers disminuye considerablemente en comparación con el resto de pares de variables. Tomando como ejemplo los pares: (DAYS_EMPLOYED & CNT_CHILDREN) y (DAYS_BIRTHDAY & CNT_CHILDREN) el valor de $\varepsilon = 17.10$ mientras que para el par (DAYS_BIRTH & DAYS_EMPLOYED) el valor de $\varepsilon = 0.685$
+
+Como podemos ver en la mayoría de resultados, para un valor de minPTS=5 y un valor de $\varepsilon = 0.08$, obtenemos siempre más de un 3 clústers en todos los pares de variables. Dónde menos clústers se obtienen es para los pares (DAYS_EMPLOYED & CNT_CHILDREN) y (DAYS_BIRTHDAY & CNT_CHILDREN) Para el resto de variables, obtenemos más clústeres, aunque se observan aquellos más predominantes, como en el caso del par (DAYS_BIRTHDAY & DAYS_EMPLOYED) Por ejemplo, para el par (AMT_INCOME_TOTAL & CNT_CHILDREN) vemos 3 clústeres predominantes, pero también vemos unos cuantos esparcidos entre medias. Si ya de por sí, los clústeres son bastante homogeneos (no hay una gran diferenciación entre las dos clases, en cuanto a valores de las variables) tener un número de clústeres, mayor al que se supone que se tiene que tener, no es una buena idea. Esto se debe a que si ya puede llegar es dificil, por no decir imposible, intentar visualizar los clientes de alto y bajo riesgo en sus respectivos clústers de las gráficas de arriba, tener clústers de más entorpece la labor de investigación.
+
+A la vista de los resultados, podemos decir que estos, no se ajustan con las preferencias de clasificación. Nuestro problema tiene dos tipos de clientes, y es lo que queremos clasificar, por lo tanto, obtener más de dos clústers no es un resultado aceptable. Dicho esto, en el siguiente apartado, se van a modificar los valores de $\varepsilon$ y de `minPTS` para ver si conseguimos reducir los grupos de muestras a dos.
+
+### Se prueban, describen e interpretan los resultados con diferentes valores de `eps` y `minPts`.
+
+En el anterior apartado hemos aplicado los dos algoritmos, pero solo para un valor de `minPts` y de $\varepsilon$. Por lo tanto, en este apartado, realizaremos simulaciones para distintos valores de de `minPts` y de $\varepsilon$.
+
+Primero vamos a empezar con el algoritmo OPTICS, y vamos a realizar varias simulaciones para distintos valores de `minPts`, véase a continuación el siguiente *chunk* de código:
+
+```{r}
+set.seed(6543)
+
+for (i in 1:ncol(combinaciones)) {
+  etiqueta1 <- combinaciones[1, i]
+  etiqueta2 <- combinaciones[2, i]
+  cat("\n\nObservación para el par de atributos: ", etiqueta1, etiqueta2)
+  
+  for (i in c(5:10)){
+    observaciones <- optics(df_app_rec_kmeans_fin_norm[, c(etiqueta1, etiqueta2)], minPts = i)
+    resultados_observaciones <- observaciones
+    cat("\n")
+    print(resultados_observaciones)
+  }
+}
+```
+
+Nótese, como minPts define la mínima densidad aceptada alrededor de un centroide. Incrementar este parámetro nos permitirá reducir el ruido (observaciones no asignadas a ningún cluster)
+
+Tras analizar los resultados, nos damos cuenta de que el mejor resultado se vuelve a obtener para `minPTS=5` y para el mismo par de atributos, i.e., `DAYS_BIRTH`y `DAYS_EMPLOYED`, de hecho con respecto al resto de las combinaciones de atributos, hemos confirmado como para todos los valores de `minPTS` los valores de $\varepsilon$ más bajos obtenidos son para el par anterior de variables, ya que no pasan de la unidad y muchos de ellos no llegan ni siquiera a la unidad. Estudiando las observaciones relativas al resto de combinaciones de variables, vemos como el segundo mejor par de variables, es el de las variables: `AMT_INCOME_TOTAL`y `DAYS_EMPLOYED`. A este par, le sigue el par de variables `AMT_INCOME_TOTAL`y `DAYS_BIRTH` con el tercer mejor puesto en cuanto a valores de $\varepsilon$.
+
+Observando los resultados, observamos como según va aumentando el valor de **minPTS** el valor de $\varepsilon$ tabién lo hace. Esto es lógico, y tiene una explicación, y es que el parámetro **minPTS** se refiere al número mínimo de puntos que tiene que haber dentro de un radio $\varepsilon_{optics}$ para que un punto sea alcanzable por otro. Por ello, cuando uno va aumentando el valor de **minPTS** se está aumentando el límite mínimo de densidad que se requiere para considerar a un punto como parte del clúster, y al aumentar este limite, puede que se requiera aumentar el radio $\varepsilon_{optics}$ afin de englobar áreas más extensas de densidad en las muestras.
+
+Ahora que ya hemos aplicado el algoritmo de OPTICS, procedemos a aplicar el algoritmo de DBSCAN. Vamos a aplicar el algoritmo de DBSCAN, para todos los pares de variables y para distintos valores de $\varepsilon$. Véase el siguiente *chunk* de código:
+
+En este primer ejemplo, probamos con eps_cl=2:
+
+```{r}
+set.seed(6543)
+# creamos una lista donde guardaremos los resultados de las observaciones
+resultados_observaciones <- list()
+combinaciones <- combn(c("AMT_INCOME_TOTAL", "DAYS_BIRTH", "DAYS_EMPLOYED", "CNT_CHILDREN"), 2)
+print(combinaciones[, ])
+
+for (i in 1:ncol(combinaciones)) {
+  etiqueta1 <- combinaciones[1, i]
+  etiqueta2 <- combinaciones[2, i]
+  cat("\n\nObservación para el par de atributos: ", etiqueta1, etiqueta2)
+  # Utilizar [[]] para extraer las columnas del dataframe
+  observaciones <- optics(df_app_rec_kmeans_fin_norm[, c(etiqueta1, etiqueta2)], minPts = 5)
+  result_observa <- extractDBSCAN(observaciones, eps_cl = 2)
+  resultados_observaciones[[i]] <- result_observa
+  cat("\n")
+  print(resultados_observaciones[[i]])
+  plot(result_observa, main=paste(etiqueta1,"&",etiqueta2))
+}
+```
+
+Como la distancia de alcanzabilidad es tan grande, no se logra diferenciar más de un clúster, y por lo tanto, todas las muestras quedan clasificadas bajo el mismo clúster. Viendo este resultado, vamos a disminuir mucho más el valor de $\varepsilon$. Véase este otro ejemplo:
+
+```{r}
+set.seed(6543)
+# creamos una lista donde guardaremos los resultados de las observaciones
+resultados_observaciones <- list()
+combinaciones <- combn(c("AMT_INCOME_TOTAL", "DAYS_BIRTH", "DAYS_EMPLOYED", "CNT_CHILDREN"), 2)
+print(combinaciones[, ])
+
+for (i in 1:ncol(combinaciones)) {
+  etiqueta1 <- combinaciones[1, i]
+  etiqueta2 <- combinaciones[2, i]
+  cat("\n\nObservación para el par de atributos: ", etiqueta1, etiqueta2)
+  # Utilizar [[]] para extraer las columnas del dataframe
+  observaciones <- optics(df_app_rec_kmeans_fin_norm[, c(etiqueta1, etiqueta2)], minPts = 5)
+  result_observa <- extractDBSCAN(observaciones, eps_cl = 0.2)
+  resultados_observaciones[[i]] <- result_observa
+  cat("\n")
+  print(resultados_observaciones[[i]])
+  plot(result_observa, main=paste(etiqueta1,"&",etiqueta2))
+}
+```
+
+Para $\varepsilon = 0.2$ obtenemos mejores resultados, pero aun así, obtenemos más de dos clústers en la mayoría de los pares de variables. Vamos a subir un poco el valor de $\varepsilon$ hasta $\varepsilon = 0.5$
+
+```{r}
+set.seed(6543)
+# creamos una lista donde guardaremos los resultados de las observaciones
+resultados_observaciones <- list()
+combinaciones <- combn(c("AMT_INCOME_TOTAL", "DAYS_BIRTH", "DAYS_EMPLOYED", "CNT_CHILDREN"), 2)
+print(combinaciones[, ])
+
+for (i in 1:ncol(combinaciones)) {
+  etiqueta1 <- combinaciones[1, i]
+  etiqueta2 <- combinaciones[2, i]
+  cat("\n\nObservación para el par de atributos: ", etiqueta1, etiqueta2)
+  # Utilizar [[]] para extraer las columnas del dataframe
+  observaciones <- optics(df_app_rec_kmeans_fin_norm[, c(etiqueta1, etiqueta2)], minPts = 5)
+  result_observa <- extractDBSCAN(observaciones, eps_cl = 0.5)
+  resultados_observaciones[[i]] <- result_observa
+  cat("\n")
+  print(resultados_observaciones[[i]])
+  plot(result_observa, main=paste(etiqueta1,"&",etiqueta2))
+}
+```
+
+Como podemos observar, no se aprecia ninguna mejoría notable. Nos damos cuenta de que vamos a seguir obteniendo 3 clústeres para todos los pares con la variable: `CNT_CHILDREN` ya que los 3 picos que pueden verse en el diagrma de alcanzabilidad, son de la misma altura, por lo tanto solo seremos capaces de tener un colo clúster, o 3, pero nunca 2. Por lo tanto $\nexists \varepsilon:k=2$.
+
+Ahora vamos a modificar los valores de minPTS y de $\varepsilon$ para el segundo tipo de implementación del algoritmo DBSCAN.
+
+```{r}
+library(dbscan)
+
+# Aplicar el algoritmo DBSCAN
+# Establecer eps y minPts según tus necesidades
+resultados <- dbscan(df_app_rec_kmeans_fin_norm, eps = 4, minPts = 3)
+
+# Visualizar los resultados
+plot(df_app_rec_kmeans_fin_norm, col = resultados$cluster + 1, pch = 16, main = "DBSCAN Clustering")
+legend("topright", legend = unique(resultados$cluster), col = unique(resultados$cluster) + 1, pch = 16, title = "Cluster")
+```
+
+Podemos ver, como aumentando un poco epsilon, disminuimos el número de clústeres, y como si aumentamos el valor de minPTS también propiciamos que los resultados tiendan a tener menos clústers. En este ejemlo de arriba vemos claramente el criterio de densidad que este algoritmo implementa, no obstante, la distancia estipulada por epsilon está jugando su papel. Vamos a modificar los valores a ver si obtenemos mejores resultados.
+
+```{r}
+library(dbscan)
+
+# Aplicar el algoritmo DBSCAN
+# Establecer eps y minPts según tus necesidades
+resultados <- dbscan(df_app_rec_kmeans_fin_norm, eps = 2, minPts = 800)
+
+# Visualizar los resultados
+plot(df_app_rec_kmeans_fin_norm, col = resultados$cluster + 1, pch = 16, main = "DBSCAN Clustering")
+legend("topright", legend = unique(resultados$cluster), col = unique(resultados$cluster) + 1, pch = 16, title = "Cluster")
+
+```
+
+Ahora podemos ver como si aumentamos minPTS podemos obtener mejores resultados, pues a pesar de que los extremos se clasifiquen como parte del otro clúster, a pesar de que esto no tenga que ser así, hay una gran parte de muestras, que se encuentran en los interiores del conjunto de muestras rojas, que son clasificadas como negras y por ello, este restulado tiene más sentido, ya que se parece a lo obtenido en el primer ejercicio.
+
+### Se obtiene una medida de lo bueno que es el agrupamiento.
+
+Para determinar la calidad de las agrupaciones de registros que se han obtenido en este ejercicio, se va a calcular el coeficiente de Silhouette, para el mejor caso de cada uno de los dos algoritmos que hemos implementado. Empezamos con el algoritmo OPTICS.
+
+```{r}
+set.seed(6543)
+
+# quitamos la columna target, porque no la necesitamos
+# df_app_rec_kmeans_fin_norm_optDbscan = df_app_rec_kmeans_fin_norm[,-ncol(df_app_rec_kmeans_fin_norm)]
+# summary(df_app_rec_kmeans_fin_norm_optDbscan)
+
+# creamos una lista donde guardaremos los resultados de las observaciones
+resultados_observaciones <- list()
+combinaciones <- combn(c("AMT_INCOME_TOTAL", "DAYS_BIRTH", "DAYS_EMPLOYED", "CNT_CHILDREN"), 2)
+print(combinaciones[, ])
+
+for (i in 1:ncol(combinaciones)) {
+  etiqueta1 <- combinaciones[1, i]
+  etiqueta2 <- combinaciones[2, i]
+  cat("\n\nObservación para el par de atributos: ", etiqueta1, etiqueta2)
+  # Utilizar [[]] para extraer las columnas del dataframe
+  observaciones <- optics(df_app_rec_kmeans_fin_norm[, c(etiqueta1, etiqueta2)], minPts = 5)
+  result_observa <- extractDBSCAN(observaciones, eps_cl = 1)
+  resultados_observaciones[[i]] <- result_observa
+  cat("\n")
+  print(resultados_observaciones[[i]])
+  plot(result_observa, main=paste(etiqueta1,"&",etiqueta2))
+  
+  # ahora calculamos el coeficiente de Silhouette:
+  # Calcular el coeficiente de silueta
+  if (etiqueta1 == 'DAYS_BIRTH'  && etiqueta2 == 'DAYS_EMPLOYED'){
+    cat('El oceficiente de Silhouette para estas etiquetas no se puede calcular')
+  }
+  else{
+    coef_silueta <- silhouette(result_observa$cluster, dist(df_app_rec_kmeans_fin_norm))
+    # Mostrar el coeficiente de silueta promedio
+    mean_silhouette <- mean(coef_silueta[, "sil_width"])
+    cat("\nCoeficiente de Silueta Promedio: ", mean_silhouette, "\n")
+  }
+}
+```
+
+Podemos observar como para los pares AMT_INCOME_TOTAL-DAYS_BIRTH, AMT_INCOME_TOTAL-DAYS_EMPLOYED tienen un coeficiente de Silhouette de 0.722, mientras que los pares DAYS_BIRTH-CNT_CHILDREN y DAYS_EMPLOYED-CNT_CHILDREN han obtenido un coeficiente del 0.103. Estos resultados tienen sentido, ya que para el primer par, solo tenemos un clúster, mientras que para el último de los pares, tenemos 5 clústeres, por lo tanto, en este caso, es más difícil, que las muestras muestren una mayor cohesión, que para los pares que solo tienen un clúster.
+
+Vamos a calcular el coeficiente de Silhouette para los dos mejores resultados obtenidos con DBSCAN:
+
+```{r}
+library(dbscan)
+
+# Aplicar el algoritmo DBSCAN
+# Establecer eps y minPts según tus necesidades
+resultados <- dbscan(df_app_rec_kmeans_fin_norm, eps = 2, minPts = 800)
+
+# Visualizar los resultados
+plot(df_app_rec_kmeans_fin_norm, col = resultados$cluster + 1, pch = 16, main = "DBSCAN Clustering")
+legend("topright", legend = unique(resultados$cluster), col = unique(resultados$cluster) + 1, pch = 16, title = "Cluster")
+
+# ahora calculamos el coeficiente de Silhouette:
+# Calcular el coeficiente de silueta
+coef_silueta <- silhouette(resultados$cluster, dist(df_app_rec_kmeans_fin_norm))
+
+# Mostrar el coeficiente de silueta promedio
+mean_silhouette <- mean(coef_silueta[, "sil_width"])
+cat("Coeficiente de Silueta Promedio: ", mean_silhouette, "\n")
+```
+
+Como se puede ver, el coeficiente de Silhouette es de 0.4, por lo tanto, los registros que forman parte de cada uno de los dos clústers de los que forman parte, tienen buena cohesión. Ahora lo vamos a calcular para los primeros valores de $\varepsilon$ y `minPTS`, véase el siguiente *chunk* de código.
+
+```{r}
+library(dbscan)
+
+# Aplicar el algoritmo DBSCAN
+# Establecer eps y minPts según tus necesidades
+resultados <- dbscan(df_app_rec_kmeans_fin_norm, eps = 2, minPts = 5)
+
+# Visualizar los resultados
+plot(df_app_rec_kmeans_fin_norm, col = resultados$cluster + 1, pch = 16, main = "DBSCAN Clustering")
+legend("topright", legend = unique(resultados$cluster), col = unique(resultados$cluster) + 1, pch = 16, title = "Cluster")
+
+# ahora calculamos el coeficiente de Silhouette:
+# Calcular el coeficiente de silueta
+coef_silueta <- silhouette(resultados$cluster, dist(df_app_rec_kmeans_fin_norm))
+
+# Mostrar el coeficiente de silueta promedio
+mean_silhouette <- mean(coef_silueta[, "sil_width"])
+cat("Coeficiente de Silueta Promedio: ", mean_silhouette, "\n")
+```
+
+Para estos valores de $\varepsilon$ y de minPTS obtenemos un coeficiente menor. Cuando ponemos $\varepsilon = 4$ y minPTS=5 el coeficiente asciende hasta el 0.8. Esto es normal, porque hay dos clústeres, pero la mayoría de muestras están bajo un solo clúster, mientras que las que están más lejos de las zonas más densas, son clasificadas en el otro clúster, por ello el coeficiente es mayor, porque la mayoría de las muestras están juntas y acaban cayendo en el mismo clúster, por lo que la cohesión entre muestras es muy grande.
+
+### Se comparan los resultados obtenidos de los modelos anteriores y DBSCAN.
+
+En este ejercicio hemos podido comprobar la similaridad entre los algoritmos del par (OPTICS, DBSCAN) y el algoritmo de k-means con el cálculo de la distancia de Mahalanobis. Pues tanto dicho cálculo de distancia como los algoritmos OPTICS y DBSCAN se basan en la densidad del espacio muestral, y como comprobamos con Mahalanobis, esto no funcionaba bien con nuestro juego de datos. Aquello que vimos en Mahalanobis, lo hemos vivido con los dos algoritmos de este ejercicio. Tomese como ejemplo la última implementación del algoritmo DBSCAN al final del segundo apartado de este ejercicio, en dicha implementación $\varepsilon$ y `minPTS = 800` y puede verse como en las esquinas del conjunto muestral, se suele clasificar diferentemente a los registros, simplemente por una cuestión de densidad. Esto es algo desde el punto de vista de clasificación de nuestro juego de datos, completamente incorrecto, ya que como vimos en el primer ejercicio, nuestros registros pertenecientes a las dos clases de datos, están completamente dispersos, no siguen ningun patrón gráficamente hablando. Este hecho también se debe al tipo de variables, ya que tanto el salario como los días restantes hasta el cumpleaños, o los días que el empleado lleva trabajando, son variables de naturaleza más estocástica, en comparación con la cantidad de hijos que los clientes pueden tener.
+
+Comparando los coeficientes de Silhouette de DBSCAN con el resto de modelos, vemos como para el mejor caso del DBSCAN, que es el que se corresponde con los valores $\varepsilon = 2$, minPts = 800, el coeficiente es de 0.4. Comparándolo con el coeficiente obtenido con la distancia de MacQueen, el resultado con DBSCAN es mejor, ya que el de MAcQueen era de 0.37, pero hay que destacar que son muy similares. Ahora bien, si comparamos el 0.4 con los resultados obtenidos con Mahalanobis, vemos claramente como de nuevo gana el algoritmo de DBSCAN, pues para Mahalanobis obtuvimos coeficientes de Silhouette negativos que rondaban los valores de -0.11 y de -0.21. Ahora bien, si comparamos el resultado que se obtuvo con el k-means (computado con la distancia euclidiana) vemos como esta vez gana el algoritmo de k-means convencional, pues con el se obtuvo un coeficiente de 0.6.
+
+### Se comentan las conclusiones.
+
+Como se ha podido ver en general, estos dos algoritmos no han surtido mucho efecto, excepto para algún caso del DBSCAN. Esta "ineficacia" principalmente se debe a la naturaleza de los datos. Como ya se ha comentado en numerosas ocasiones, el juego de datos que hemos utilizado no es "muy expresivo" por lo que la clasificación de sus registros no es tan fácil. En la PAC1 ya pudimos corroborar, como el dataset no tenía variables fuertemente correlacionadas, que pudiesen llegar a explicar más información. Esta falta de correlación y la homogeneidad de los grupos que se han formado, se han visto en los resultados obtenidos con estos dos algoritmos, que aun a pesar de obtener mejores resultados para valores mayores de $\varepsilon$ y de `minPTS` no consiguen terminar de mejorar la clasificación.
+
+Ahora bien, a pesar de que los datos no sean tan "ricos" en cuanto a relación entre variables, hay que recordar que aquello que se ha mencionado en la comparativa del ejercicio anterior, es también algo a tener en cuenta, porque el método de clasificación está influenciado en gran medida, por la densidad del espacio muestral, algo que está impactando negativamente a nuestro proyecto de clasificación.
+
+------------------------------------------------------------------------
+
+## Ejercicio 4
+
+En este apartado, vamos a preparar los conjuntos de datos, que le meteremos al modelo de clasificación supervisado en el siguiente ejercicio. \### Se seleccionan las muestra de entrenamiento y test.
+
+Para la selección de las muestras de entrenamiento y test, tenemos que tener cuidado. Esto es importante, sobretodo cuando se acometa la evaluación del árbol de decisión diseñado. En esta etapa de preparación de los datos, tendremos que separar el juego de datos en un conjunto destinado al entrenamiento, y en otro destinado al *test* del modelo (esto es algo que ya hemos visto en temas anteriores, y es algo muy importante ya que hay que hacerlo bien para evitar que el modelo clasificatorio se desconcierte, en caso de que este vea un dato a la hora del *test* que previamente no ha visto en la etapa de entrenamiento)
+
+Como ya hemos estudiado en teoría, lo más apropiado es emplear un conjunto de datos distinto al que se va a usar para desarrollar el árbol de decisión, es decir, un conjunto que no sea el de entrenamiento. Sabemos que no existe una proporción predefinida en relación con el número relativo de elementos en cada subconjunto, pero la proporción más comúnmente adoptada suele ser de 2/3 para el conjunto de entrenamiento y de 1/3 para el conjunto de prueba (exactamente lo que hemos visto en teoría).
+
+Como hemos mencionado antes, la variable que determinará la tarea de clasificación, será `default`, ahora vamos a comenzar con la división en el siguiente *chunk* de código. Antes de separar los conjuntos de datos, vamos a recuperar el conjunto de datos sin normalizar, pues asi es como lo hicimos en la anterior PEC, y no obtuvimos malos resultados.
+
+Primero instalamos los paquetes necesarios
+
+```{r}
+if(!require(randomForest)){
+  install.packages('randomForest',repos='http://cran.us.r-project.org')
+  library(randomForest)
+}
+
+if(!require(iml)){
+  install.packages('iml', repos='http://cran.us.r-project.org')
+  library(iml)
+}
+```
+
+```{r}
+# conultamos los primeros y los últimos valores, para chequear que los IDs coinciden
+head(df_app_rec)
+tail(df_app_rec)
+
+# ahora calculamos el número de ocurrencias de los dos posibles valores dentro
+# de la variable target:
+table(df_app_rec$target)
+
+app_rec_kmeans_fin = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+                                "CNT_CHILDREN", "target", "ACCOUNT_LENGTH")]
+head(app_rec_kmeans_fin)
+tail(app_rec_kmeans_fin)
+
+# establecemos la semilla aleatoria
+set.seed(666)
+y <- app_rec_kmeans_fin[,5] # target está en la columna 5
+# hacemos la selección de columnas para no coger la etiqueta col(5)
+rest_cols = c(1:4, 6)
+cols_omit = c(5)
+
+x <- app_rec_kmeans_fin[, setdiff(rest_cols, cols_omit)]
+```
+
+Ahora que ya tenemos los conjuntos para el entrenamiento y validación (i.e., *test*) vamos a definir de manera dinámica la manera de separar en función de un parámetro, a fin de poder definir un parámetro que controla el *split* de forma dinámica.
+
+```{r}
+split_prop <- 3
+indexes = sample(1:nrow(app_rec_kmeans_fin), size=floor(((split_prop-1)/split_prop)*nrow(app_rec_kmeans_fin)))
+trainx<-x[indexes,]
+trainy<-y[indexes]
+testx<-x[-indexes,]
+testy<-y[-indexes]
+```
+
+En el código de arriba, primero se está determinando el factor con el que se va a dividir el conjunto, luego generamos un conjunto aleatorio de índices que usaremos a fin de dividir el juego de datos original, en un subconjunto destinado al entrenamiento del modelo, y en otro destinado a su validación. El tamaño de este conjunto de índices viene dado por el factor especificado en la variable `split_prop`. Conocidos los índices, podemos generar los conjuntos de *train* y de *test*, y esto es lo que se hace en las siguientes lineas. La variable `trainx` contiene el conjunto de datos destinado al entrenamiento del modelo, formado a partir de la selección con los índices generados antes, de las filas del *dataframe* `x`. Luego, en la variable `trainy` se guardan los datos etiquetados, necesarios para el entrenamiento. Ya por último, en las variables `testx` y `testy` se hace exactamente lo mismo que en las variables `trainx` y `trainy` respectivamente, a diferencia de que ahora, la selección de las filas en las variables `testx` y `testy` se realiza especificando un "-" delante, indicando la selección de las filas que no están en el conjunto de datos del entrenamiento.
+
+Ya hemos extraído de manera estocástica los casos, por ello es imprescindible comprobar que todos los subconjuntos de datos que se han creado no contienen ningún error. Por esta razón, primero se va a comprobar que la proporción de clientes en situación de *default* es constante en los dos nuevos conjuntos.
+
+```{r}
+# print("Valores NULOS dentro del df_credrec_ori")
+# colSums(is.na(app_rec_kmeans_fin))
+# 
+# print("Valores vacíos dentro del df_original")
+# colSums(app_rec_kmeans_fin == '')
+
+summary(trainx)
+table(trainy) # para visualizar la cantidad de valores
+summary(testx)
+table(testy) # para visualizar la cantidad de valores
+```
+
+Vamos a calcular los porcentajes:
+
+```{r}
+tr = table(trainy)
+ts = table(testy)
+
+cat('El porcentaje de registros destinados al training es:', (tr[1]+tr[2])*100/nrow(df_app_rec),"%, equivalente a: ",200/3, "%")
+cat('\nEl porcentaje de registros destinados al test es    :', (ts[1]+ts[2])*100/nrow(df_app_rec),"%, equivalente a: ",100/3, "%")
+```
+
+Como podemos comprobar, efectivamente, hemos particionado los dos conjuntos de datos en dos y un tercio, correspondientemente, entre el conjunto destinado al entrenamiento, y el resto destinado a la validación del modelo.
+
+Cabe destacar, que las clases están muy desbalanceadas, y en caso de que esto supusiese un problema de cara a la construcción del árbol, tendríamos que solventar este desbalance, eliminando registros correspondientes a la clase mayoritaria, esto quiere decir, que habría que eliminar muchos registros con `target=1` para balancear las clases. \### justifican las proporciones seleccionadas.
+
+Como se ha explicado antes, esta proporción se justifica en lo visto en teoría, que a su vez se respalda en la práctica habitual de los cientificos de datos, y en los ingenieros de machine learning. Estas proporciones se basan en la idea de que utilizar una proporción mayor de datos para el entrenamiento ayuda al modelo a aprender patrones subyacentes en los datos, mientras que la porción más pequeña reservada para el test, permite evaluar la capacidad del modelo para generalizar a datos no vistos y asi evitar el famoso *overfitting*.
+
+------------------------------------------------------------------------
+
+## Ejercicio 5
+
+En este ejercicio nos centraremos en la construcción de un modelo supervisado, basado en los árboles de decisión.
+
+### Se generan reglas y se seleccionan e interpretan las más significativas.
+
+Como ya vimos en teoría, y en la PEC3, los árboles de decisión pueden estar formados por distintos níveles, donde la dinámica de partición de cada nivel se realiza mediante normas, que determinan, cuales son las condiciones que cada registro ha de cumplir para que este vaya por una rama o por otra, o para que simplemente acabe clasificado en un nodo terminal u otro.
+
+Como se ha podido estudiar en teoría, los árboles de decisión juegan un papel muy importante en el campo del aprendizaje automático, no solo por su potencia sino también por su versatilidad e intuitividad. Estos permiten al programador conocer y determinar los aspectos específicos de un árbol. Los árboles de decicisón son uno de los modelos supervisados de clasificación que se usan más en problemas de minería de datos, principalmente por su alta capacidad explicativa debido a que es muy fácil de interpretar. Como hemos estudiado, estas estructuras pueden implementarse tanto en problemas supervisados de clasificación como en problemas supervisados de regresión.
+
+La idea principal que cimienta el concepto de los árboles de decisión es la división del espacio de datos de entrada que acometen, a fin de crear regiones separadas, asegurando que todas las muestras en una región pertenezcan a la misma clase. En caso de que una región contenga muestras de clases diferentes, se divide en regiones más pequeñas utilizando el mismo criterio. Este proceso continúa hasta que todas las regiones contienen solo muestras de una clase. Un árbol de decisión se considera completo o puro si es factible construir un árbol que cumpla con esta condición.
+
+Teniendo la idea de arbol de decisión clara, vamos a proceder a contruir el árbol para posteriormente extraer sus reglas y las métricas de calidad necesarias que permitan su análisis.
+
+Antes de construir el modelo, cabe destacar, que para la creación del árbol de decisión hemos tomado las variables mejor representadas, así como las que más explicaban (analíticamente) el juego de datos, en total son 6 variables, si contamos la variable que queremos clasificar (la variable `target`) En caso de observar un funcionamiento no deseado, se suprimirán las variables menos trascendentales, pero tendremos que volver a generar los conjuntos de `train` y `test`. Véase el siguiente *chunk* de código:
+
+```{r}
+trainy <- as.factor(trainy)
+model <- C50::C5.0(trainx, trainy, rules=TRUE)
+summary(model)
+
+model <- C50::C5.0(trainx, trainy)
+plot(model)
+```
+
+Como podemos observar, no se ha impreso ninguna regla, porque no se ha creado ningún árbol como tal, y se observa un error de clasificación del 13%, pues el árbol solo ha clasificado correctamente el 87% de las muestras. Es decir, este no ha sido capaz de clasificar correctamente, las muestras de datos pertencientes a la otra clase, por lo que aunque el error de clasificación sea bajo, esto no significa que sea un buen resultado, simplemente significa que es un problema de clasificación desequilibrado, donde la cantidad de muestras de una clase, sobrepasa notablemente la cantidad de muestras de la otra, y el modelo que se ha aplicado, simplemente no ha sido capaz de diferenciar ninguna de las muestras pertenecientes a la otra clase.
+
+Teniendo en cuenta el resultado de antes, vamos a proceder a recortar el espacio muestral, tal y como tuvimos que hacer en la PEC3. Iremos probando combinaciones de variables. Véase el siguiente *chunk* de código.
+
+```{r}
+# establecemos la semilla aleatoria para temas de reproducibilidad
+semilla_aleatoria = 1
+set.seed(semilla_aleatoria)
+
+# ahora vamos a convertir todos los datos a variables de tipo "factor"
+df_app_rec[] <- lapply(df_app_rec, factor)
+str(df_app_rec)
+
+# app_rec_kmeans_fin = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+#                                 "CNT_CHILDREN", "target", "ACCOUNT_LENGTH")]
+# head(app_rec_kmeans_fin)
+# tail(app_rec_kmeans_fin)
+
+# creamos un data frame nuevo que contenga solo las columnas que queremos:
+selec_cols = c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED","target")
+
+df_original_sub <- df_app_rec[, selec_cols]
+head(df_original_sub)
+
+# ahora separamos el resto de variables de la etiqueta (variable a clasificar)
+y <- df_original_sub[,length(selec_cols)] # seleccionamos la columna de target
+x <- df_original_sub[,1:length(selec_cols)-1]
+head(x)
+
+# Ahora que ya hemos creado el nuevo conjunto de datos, procedemos a dividir y crear los nuevos conjuntos:
+split_prop <- 3
+indexes = sample(1:nrow(df_original_sub), size=floor(((split_prop-1)/split_prop)*nrow(df_original_sub)))
+trainx<-x[indexes,]
+trainy<-y[indexes]
+testx<-x[-indexes,]
+testy<-y[-indexes]
+
+# Ahora comprobamos los conjuntos, tal y como hicimos la primera vez, véase el siguiente *chunk* de código:
+summary(trainx)
+table(trainy)
+summary(testx)
+table(testy)
+
+# ahora comprobamos los proporciones
+tr = table(trainy)
+ts = table(testy)
+
+cat('\nEl porcentaje de registros destinados al training es:', (tr[1]+tr[2])*100/nrow(df_original_sub),"%, equivalente a: ",200/3, "%")
+cat('\nEl porcentaje de registros destinados al test es    :', (ts[1]+ts[2])*100/nrow(df_original_sub),"%, equivalente a: ",100/3, "%\n")
+
+# Ahora vamos a constuir el árbol a partir de los datos ya modificados.
+set.seed(semilla_aleatoria)
+trainy <- as.factor(trainy)
+
+# model <- C50::C5.0(trainx, trainy, rules = TRUE, trials = 3, control = C5.0Control(minCases = 2))
+model <- C50::C5.0(trainx, trainy, rules=TRUE)
+summary(model)
+
+model <- C50::C5.0(trainx, trainy)
+plot(model)
+```
+
+Como se puede comprobar, no se obtiene ningún modelo, esto quiere decir, que la función C50::C5.0 no ha sido capaz de construir un árbol de decisión. Se ha revisado el código minuciosamente, al igual que se han probado con más de la mitad de las posibles combinaciones de las 21 variables que hay en el dataset, y no se ha logrado ni un solo árbol correcto, ya que el único que se ha logrado ha sido uno tan poblado que no se veían los nodos ni las reglas obtenidas, por lo que no era correcto, tampoco se conoce con exactitud las variables que lo hacían posible, porque se descarto r+apidamente. Dicho esto, y observando los resultados de los conjuntos de datos, llegamos a la conclusión de que no es un problema del modelo sino de los datos. Se cree que el problema tiene que ver con el desbalanceo de datos que hay. Ya que estudiando los resultados de los conjuntos obtenidos para el *training* y para el *test* apreciamos la gran diferencia entre el número de clientes con `target=0` (3890 en el ejemplo de arriba (training)) y el número de clientes con `target=1` (586 en el ejemplo de arriba (training)) Como no, este problema también se aprecia en el conjunto de validación, dónde en el ejemplo anterior, encontramos 1912 clientes con `target=0` y tan solo 327 con `target=1`. Se cree que esto es lo que pueda estar frenando al modelo de construir un árbol de decisión, por ello, ¿cual es la solución a este problema? simplemente habría que submuestrear el número de registros pertenecientes a la clase mayoritaria, esto se refiere a eliminar muchos registros de la clase mayoritaria, para así poder balancear la propoción de clases, y que las dos clases estén igualmente de bien representadas y que sea posible construir un árbol. Ya que el problema que podríamos estar teniendo, es que al haber un desbalance tan grande entre clases, la función C50 no estaría encontrando ninguna forma de construir del árbol, ya que una de las clases no estaría bien representada o nisiquiera suficientemente representada.
+
+Dicho esto, a continuación vamos a eliminar varios registros del juego de datos, para balancear las clases. Véase el siguiente *chunk* de código. Primero determinamos la propoción que queremos obtener.
+
+```{r}
+df_app_rec2 = df_app_rec
+table(df_app_rec$target)
+
+# Contar el número de registros antes de eliminar
+nrow_antes <- nrow(df_app_rec2)
+cat("Número de registros antes de eliminar:", nrow_antes, "\n")
+
+# Especificar cuántos registros eliminar
+registros_a_eliminar <- 4800
+
+# Identificar los índices de registros a eliminar
+indices_a_eliminar <- sample(which(df_app_rec2$target == 0), registros_a_eliminar)
+
+# Eliminar los registros
+df_app_rec22<- df_app_rec2[-indices_a_eliminar, ]
+
+# Contar el número de registros después de eliminar
+nrow_despues <- nrow(df_app_rec22)
+cat("Número de registros después de eliminar:", nrow_despues, "\n")
+
+# Reenumeramos las filas en orden
+rownames(df_app_rec22) <- NULL
+head(df_app_rec22)
+tail(df_app_rec22)
+
+# ahora vemos la proporción final
+table(df_app_rec22$target)
+```
+
+Ahora que ya hemos eliminado una gran cantidad de registros de la clase mayoritaria, procedemos a construir los conjuntos de datos del entrenamiento y del test, de cara a la construcción del árbol de decisión.
+
+```{r}
+# establecemos la semilla aleatoria para temas de reproducibilidad
+semilla_aleatoria = 2000
+set.seed(semilla_aleatoria)
+
+# app_rec_kmeans_fin = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+#                                 "CNT_CHILDREN", "target", "ACCOUNT_LENGTH")]
+summary(df_app_rec22$AMT_INCOME_TOTAL_DIS)
+
+# creamos un data frame nuevo que contenga solo las columnas que queremos:
+selec_cols = c("CNT_CHILDREN","FLAG_OWN_REALTY","target")
+
+df_original_sub <- df_app_rec22[, selec_cols]
+head(df_original_sub)
+
+# ahora separamos el resto de variables de la etiqueta (variable a clasificar)
+y <- df_original_sub[,length(selec_cols)] # seleccionamos la columna de target
+x <- df_original_sub[,1:length(selec_cols)-1]
+head(x)
+
+# Ahora que ya hemos creado el nuevo conjunto de datos, procedemos a dividir y crear los nuevos conjuntos:
+split_prop <- 3
+indexes = sample(1:nrow(df_original_sub), size=floor(((split_prop-1)/split_prop)*nrow(df_original_sub)))
+trainx<-x[indexes,]
+trainy<-y[indexes]
+testx<-x[-indexes,]
+testy<-y[-indexes]
+
+# Ahora comprobamos los conjuntos, tal y como hicimos la primera vez, véase el siguiente *chunk* de código:
+summary(trainx)
+table(trainy)
+summary(testx)
+table(testy)
+
+# ahora comprobamos los proporciones
+tr = table(trainy)
+ts = table(testy)
+
+cat('\nEl porcentaje de registros destinados al training es:', (tr[1]+tr[2])*100/nrow(df_original_sub),"%, equivalente a: ",200/3, "%")
+cat('\nEl porcentaje de registros destinados al test es    :', (ts[1]+ts[2])*100/nrow(df_original_sub),"%, equivalente a: ",100/3, "%\n")
+
+# Ahora vamos a constuir el árbol a partir de los datos ya modificados.
+set.seed(semilla_aleatoria)
+trainy <- as.factor(trainy)
+
+# model <- C50::C5.0(trainx, trainy, rules = TRUE, trials = 3, control = C5.0Control(minCases = 2))
+model <- C50::C5.0(trainx, trainy, rules=TRUE)
+summary(model)
+
+model <- C50::C5.0(trainx, trainy)
+plot(model)
+```
+
+Se supone que arriba aparecía un árbol con dos nodos terminales, pero por alguna razón, a pesar de no haber cambiado la semilla aleatoria, el resultado ha cambiado, no osbtante, se deja la explicación que se dió al respecto.
+
+Tras haber probado diferentes combinaciones de variables esta es una de las pocas que han generado un árbol, pero aún así, puede verse como el modelo no es capaz de clasificar correctamente las clases, ya que se obtiene un error de clasificación del 46.7%, algo intolerable. A parte del error de clasificación tan alto, observando el árbol que se ha creado, podemos comprobar como solo hay una variable, y por lo tanto dos nodos terminales. En este caso, de las dos variables que se han especificado (sin contar la variable que se quiere clasificar): `CNT_CHILDREN`, `FLAG_OWN_REALTY` el algoritmo solamente ha hecho uso de una sola variable, en este caso, solo se ha usado `CNT_CHILDREN`, lo que significa, que el modelo ha usado solamente una variable para clasificar a los clientes dependiendo de su nivel de riesgo. Aunque puede que el algoritmo haya conseguido clasificar correctamente el 53.3% de las muestras, no es aceptable, que de un juego de datos de más de 15 columnas, un algoritmo clasifique los resgistros solamente teniendo en cuenta una variable.
+
+Es importante mencionar, que en este punto, se ha probado de todo, para poder obtener un árbol correcto, e.g., se han probado casí todas las combinaciones posibles de variables, se ha probado con diferentes valores de semillas aleatorias (cada vez que se probaba una nueva combinación de variables), se ha probado tambíen con las variables discretizadas en la PAC1, pero el modelo no las acepta (el formato no es correcto). La última baza que nos falta por jugar, es discretizar la variable que más impacto tiene en el juego de datos, i.e., `AMT_INCOME_TOTAL`, de manera que esta no tenga tantos valores, e impida al modelo producir un árbol. Por ello, se va a discretizar esta variable en diferentes grupos, y se le va a asignar a cada grupo un número: de 1: nº grupos.
+
+Si después de discretizar la variable, no se consigue obtener un árbol de decisión aceptable, con más de una variable, y con un error de clasificación menor al 30% (que sigue siendo una cifra alta) entonces no tendremos otro remedio que seguir realizando el ejercicio con el único resultado posible, ya que el problema no está en el modelo sino en los datos. De manera paralela, si hubiese tiempo, se intentaría buscar una base de datos parecida, y realizar este ejercicio y el siguiente con dicha base de datos, pero esto lo veremos luego.
+
+Comenzamos con la discretización de la variable `AMT_INCOME_TOTAL`, véase el siguiente *chunk* de código.
+
+```{r}
+if (!require('arules')) install.packages('arules'); library('arules')
+library(dplyr)
+
+head(df2_app_rec[c("AMT_INCOME_TOTAL_DIS")])
+intervalos = c(27000,100000,500000,1000000,6800000)
+
+# df2_app_rec$AMT_INCOME_TOTAL_DIS_2 <- (discretize(df2_app_rec$AMT_INCOME_TOTAL, "cluster"))
+df2_app_rec$AMT_INCOME_TOTAL_DIS_2 <- cut(df2_app_rec$AMT_INCOME_TOTAL, breaks = intervalos, labels = c("A","B","C","D"))
+
+head(df2_app_rec[c("AMT_INCOME_TOTAL_DIS_2")])
+head(df2_app_rec)
+
+#ahora llevamos a cabo la eliminación que ya hicimos, para balancear las clases:
+# Especificar cuántos registros eliminar
+registros_a_eliminar <- 4800
+
+# Identificar los índices de registros a eliminar
+indices_a_eliminar <- sample(which(df2_app_rec$target == 0), registros_a_eliminar)
+
+# Eliminar los registros
+df_app_rec22<- df2_app_rec[-indices_a_eliminar, ]
+
+# Contar el número de registros después de eliminar
+nrow_despues <- nrow(df_app_rec22)
+cat("Número de registros después de eliminar:", nrow_despues, "\n")
+table(df_app_rec22$target)
+
+# Reenumeramos las filas en orden
+rownames(df_app_rec22) <- NULL
+```
+
+Ahora que ya hemos discretizado la variable `AMT_INCOME_TOTAL` vamos a intentar crear un árbol de decisión
+
+```{r}
+library(ggplot2)
+library(grid)
+
+# establecemos la semilla aleatoria para temas de reproducibilidad
+semilla_aleatoria = 1
+set.seed(semilla_aleatoria)
+
+# app_rec_kmeans_fin = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+#                                 "CNT_CHILDREN", "target", "ACCOUNT_LENGTH")]
+summary(df_app_rec22$AMT_INCOME_TOTAL_DIS_2)
+
+# creamos un data frame nuevo que contenga solo las columnas que queremos:
+selec_cols = c("AMT_INCOME_TOTAL_DIS_2","CNT_CHILDREN","ACCOUNT_LENGTH","DAYS_EMPLOYED","target")
+
+df_original_sub <- df_app_rec22[, selec_cols]
+head(df_original_sub)
+
+# ahora separamos el resto de variables de la etiqueta (variable a clasificar)
+y <- df_original_sub[,length(selec_cols)] # seleccionamos la columna de target
+x <- df_original_sub[,1:length(selec_cols)-1]
+head(x)
+
+# Ahora que ya hemos creado el nuevo conjunto de datos, procedemos a dividir y crear los nuevos conjuntos:
+split_prop <- 3
+indexes = sample(1:nrow(df_original_sub), size=floor(((split_prop-1)/split_prop)*nrow(df_original_sub)))
+trainx<-x[indexes,]
+trainy<-y[indexes]
+testx<-x[-indexes,]
+testy<-y[-indexes]
+
+# Ahora comprobamos los conjuntos, tal y como hicimos la primera vez, véase el siguiente *chunk* de código:
+summary(trainx)
+table(trainy)
+summary(testx)
+table(testy)
+
+# ahora comprobamos los proporciones
+tr = table(trainy)
+ts = table(testy)
+
+cat('\nEl porcentaje de registros destinados al training es:', (tr[1]+tr[2])*100/nrow(df_original_sub),"%, equivalente a: ",200/3, "%")
+cat('\nEl porcentaje de registros destinados al test es    :', (ts[1]+ts[2])*100/nrow(df_original_sub),"%, equivalente a: ",100/3, "%\n")
+
+# Ahora vamos a constuir el árbol a partir de los datos ya modificados.
+set.seed(1)
+trainy <- as.factor(trainy)
+
+# model <- C50::C5.0(trainx, trainy, rules = TRUE, trials = 3, control = C5.0Control(minCases = 2))
+model <- C50::C5.0(trainx, trainy, rules=TRUE)
+summary(model)
+
+modeloo <- C50::C5.0(trainx, trainy)
+plot(modeloo,gp = gpar(fontsize = 8.5))
+```
+
+Como bien se puede observar arriba, con la discretización del salario anual, hemos conseguido obtener un árbol de decisión con reglas. No obstante, es un árbol con un error de clasificación grande; 42.8%. Pero al menos hemos conseguido obtener un árbol, con el que realizar este ejercicio.
+
+Ahora vamos a calcular la precisión del árbol de decisión.
+
+```{r}
+predicted_modelo <- predict(modeloo, testx, type="class" )
+print(predicted_modelo)
+print(sprintf("La precisión del árbol es: %.4f %%",100*sum(predicted_modelo == testy) / length(predicted_modelo)))
+```
+
+Como podemos ver, la precisión del árbol es muy baja, pues apenas sobrepasa la mitad del 100% (52.8 %)sobrepasando en tan solo 2 puntos porcentuales la mirad. Esto era algo de esperar, teniendo en cuenta todo lo que hemos tenido que hacer de manera adicional, para poder obtener un árbol de decisión. Este mal resultado se debe principalmente a los datos, pues como ya se comentó en parráfos anteriores, las etiquetas no deben de guardar mucha relación con el resto de variables. A este inconveniente, se le suma la heterogeneidad de los datos debido principalmente a los valores continuos, que podrían estar entorpeciendo la labor de extracción de patrones o información por parte del algoritmo de clasificación supervisado, ya que son muchos valores, e..g, `ACCOUNT_LENGTH`, `DAYS_EMPLOYED` y `CNT_CHILDREN`.
+
+### Se extraen las reglas del modelo en formato texto y gráfico.
+
+Las reglas que se han obtenido son 6, y son las que pueden verse en los resultados de arriba, no obstante, se enuncian a continuación en formato de texto.
+
+-   **AMT_INCOME_TOTAL_DIS_2** = "A", **ACCOUNT_LENGTH** \> "20", **DAYS_EMPLOYED** \<= "-2262". $\rightarrow$ `target=0`. Validez: 68'4%
+-   **ACCOUNT_LENGTH** \<= "20" $\rightarrow$. `target=0`. Validez: 60'7%
+-   **AMT_INCOME_TOTAL_DIS_2** = "A", **ACCOUNT_LENGTH** \> "20", **DAYS_EMPLOYED** \> "-2262". $\rightarrow$ `target=1`. Validez: 65%
+-   **AMT_INCOME_TOTAL_DIS_2** = "{B,C,D}", **ACCOUNT_LENGTH** \> "20". $\rightarrow$ `target=1`. Validez: 53'5%
+
+<!-- -   **ACCOUNT_LENGTH** = "<=2" $\rightarrow$ `target=0`. Validez: 88'6% -->
+
+<!-- -   **NAME_INCOME_TYPE** = "State servant" $\rightarrow$ `target=0`. Validez: 58'8% -->
+
+<!-- -   **AMT_INCOME_TOTAL_DIS_2** = "A" $\rightarrow$ `target=0`. Validez: 57'8% -->
+
+<!-- -   **AMT_INCOME_TOTAL_DIS_2** = "A", **ACCOUNT_LENGTH** = ">50". $\rightarrow$ `target=1`. Validez: 76'5% -->
+
+<!-- -   **AMT_INCOME_TOTAL_DIS_2** = {"C","D"}. $\rightarrow$ `target=1`. Validez: 65'2% -->
+
+<!-- -   **AMT_INCOME_TOTAL_DIS_2** = "B", **ACCOUNT_LENGTH** = ">2", **NAME_INCOME** = {"Working", "Commercial associate", "Pensioner"} $\rightarrow$ `target=1`. Validez: 51'4% -->
+
+Como podemos ver, no son muchas reglas, y además un predominio de la variable `AMT_INCOME_TOTAL_DIS_2` esto era algo de esperar, ya que según pudimos ver en el estudio del impacto de cada una de las variables en el juego de datos en la PAC1, esta variable era una de las variables que más peso tenía, y la variable que mejor explicaba el resto del juego de datos.
+
+### Adicionalmente, se genera la matriz de confusión para medir la capacidad predictiva del algoritmo, teniendo en cuenta las distintas métricas asociadas a dicha matriz (precisión, sensibilidad, especificidad...).
+
+Tras haber obtenido la precisión y los errores de clasificación, ya podemos obtener la matriz de confusión, que como bien sabemos por teoría, debería de tener 4 valores, al tratarse de un problema de clasificación binaria. Los valores propios de la matriz de confusión para una tarea de clasificación de estas características, son los siguientes:
+
+-   `TN`: en inglés, *True Negative*. Es una muestra negativa que el sistema ha predicho como negativa.
+-   `FP`: en inglés, *False Positive*. Es una muestra negativa que el sistema ha predicho como positiva.
+-   `FN`: en inglés, *False Negative*. Es una muestra positiva que el sistema ha predicho como negativa.
+-   `TP`: en inglés, *True Positive*. Es una muestra positiva que el sistema ha predicho como positiva.
+
+Teniendo estos conceptos claros, y fijándonos en la matriz de confusión que hemos obtenido, se tiene la siguiente forma
+
+```{r}
+cat("--------|--------\n\n")
+cat("   TP   |   FN   \n\n")
+cat("--------|--------\n\n")
+cat("   FP   |   TN   \n\n")
+cat("--------|--------")
+```
+
+Ahora sí, calculamos la matriz de confusión:
+
+```{r}
+mat_conf<-table(testy,Predicted = predicted_modelo)
+mat_conf
+```
+
+Como podemos observar a simple vista, la diagonal principal suma más que la diagonal secundaria, i.e., (152+186)>(188+113) y aunque esto es lo ideal, no es por mucho, ya que como vimos en la PEC3, lo que queremos es que los elementos que están fuera de la diagonal principal sean lo más pequeños posibles en comparación con los elementos de la diagonal principal, pues es en la diagonal principal, donde se encuentran las muestras positivas, i.e., los verdaderos positivos, y los verdaderos negativos.
+
+Observando los resultados de la matriz confusión podemos inferir cómo:
+
+<!-- -   `TP`= 72 -->
+<!-- -   `FN`= 277 -->
+<!-- -   `FP`= 55 -->
+<!-- -   `TN`= 235 -->
+
+-   `TP`= 152
+-   `FN`= 188
+-   `FP`= 113
+-   `TN`= 186
+
+En el caso del los `TP` podemos ver como 152 casos positivos que efectivamente son positivos, se han clasificado correctamente. Por lo tanto, de 340 clientes, se han clasificado correctamente 152, i.e., se han clasificado correctamente, el 44.7 % de los clientes en estado de bajo riesgo (target=0). Como se han clasificado correctamente 152/340, hay 188 clientes que han sido clasificados erróneamente, i.e., clientes que en la realidad cumplen con `target = 0` pero que nuestro árbol de clasificación ha etiquetado como `target = 1`. Son cifras pobres, pero como se ha dicho anteriomente, esto era de esperar.
+
+Luego, de los 299 clientes que hay en el subconjunto de datos para el *test* del modelo, 186 clientes han sido clasificados correctamente (`TN`), es decir, clientes de alto riesgo, i.e., (clientes con `target = 1`) y que han sido etiquetados como tal. Como hay 299 clientes en el juego de datos del `test`, los `TNs` consituyen la mayoría del total (el 62'21%), significando esto que para el caso de los clientes con `target = 1` se acierta un 62'21 %, y se clasifica erróneamente un 37'79 % de las veces (`FP`) Estas cifras son peores que las anteriores.
+
+No obstante, para reafirmar la tesitura/problemática expuesta arriba, se va a representar la curva ROC, a partir de los resultados expuestos arriba. Antes de construir esta gráfica, hay recordar, cual es la información que la curva ROC arroja.
+
+Como sabemos por teoría, las curvas ROC resultan ser una herramienta muy efectiva y rápida a la hora de validar un modelo de clasificación supervisado y binario. Estas curvas representan la tasa de verdaderos positivos, i.e., la sensibilidad, en función de la tasa de falsos positivos (`FP`) (1 - Especificidad) para varios umbrales de clasificación.
+
+-   **Sensibilidad**: esto es lo que se mide en el eje y de la gráfica, y se calcula de la siguiente manera: $S = \frac{TP}{TP+FN}$, i.e., los verdaderos positivos entre el total de muestras.
+-   **Especificidad**: esta métrica se ve reflejada en el eje x, y cuantifica la proporción de muestras negativas, i.e., $FP+TN$ que son clasificadas como negativas, i.e., $TN$. Esta métrica puede calcularse de la siguiente manera: $E = \frac{TN}{FP+TN}$
+
+Los indicios que nos permiten saber si estamos de un buen o mal modelo, es la cantidad de área debajo de la curva. Cuanto más se acerque la curva ROC a una linea diagonal, peor modelo será, mientras que cuanto más a la izquierda esté la curva, el modelo será de mejor calidad.
+
+Teniendo claro esto, se procede a construir la curva ROC del árbol clasificatorio, véase el siguiente *chunk* de código:
+
+```{r}
+# primero instalamos el paquete necesario
+# install.packages("pROC")
+
+# cargamos la librería
+library(pROC)
+
+# Calcular la curva ROC
+predicted_modelo <- predict(modeloo, testx, type="class" )
+
+str(predicted_modelo)
+num_predicted_modelo <- as.numeric(levels(predicted_modelo))[predicted_modelo]
+print(length(num_predicted_modelo))
+
+curva_roc <- roc(testy, num_predicted_modelo) #size(num_predict_modelo) = 668
+
+# Dibujar la curva ROC
+plot(curva_roc, main = "Curva ROC - Árbol de Decisión (C50)", col = "blue", lwd = 2)
+
+# Calcular el área bajo la curva (AUC)
+auc_value <- auc(curva_roc)
+cat("Área bajo la curva (AUC):", auc_value, "\n")
+```
+
+La curva ROC confirma aquello que venimos diciendo a lo largo de esta última parte de la práctica, y es que el modelo no es bueno, ni tampoco se acerca a serlo, véase pues, como la curva ROC es casi una diagonal perfecta. Aunque puede observarse un pequeño hinchazón respecto a la diagonal perfecta, el comportamiento diagonal prima ante todo.
+
+Ahora vamos a calcular los porcentajes de uso de cada atributo para la toma de decisiones en el árbol (gráfica).
+
+```{r}
+set.seed(1)
+# Importamos la librería necesaria
+library(C50)
+library(ggplot2)
+
+# Extrae las reglas del árbol
+importanciaVariables = C5imp(modeloo, metric = "usage")
+importancia_splits <- C50::C5imp(modeloo, metric = "splits")
+print(importanciaVariables)
+print(importancia_splits)
+
+# Muestra la importancia de las variables
+# Convertimos las importancias a formato dataframe
+df_variables <- data.frame(variable = names(importanciaVariables), importancia = importanciaVariables, tipo = "Uso")
+df_splits <- data.frame(variable = names(importancia_splits), importancia = importancia_splits, tipo = "Splits")
+
+df_variables$indices = c("ACCOUNT_LENGTH","AMT_INCOME_TOTAL_DIS_2","DAYS_EMPLOYED","CNT_CHILDREN")
+
+# definimos la información que va a tener cada eje 
+indice5 = df_variables$indices # los indices para las dos gráficas (eje x)
+Overall1 = df_variables$Overall # (% uso/variable de construcción árbol)
+divisioness = df_splits$Overall # (% uso/variable de divisiones árbol)
+
+# Uso de cada atributo para construir el árbol (gráfica)
+ggplot(df_variables, aes(x = indice5, y = Overall1)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Porcentajes de uso de las variables para construir el árbol",
+       x = "Variables",
+       y = "Porcentaje (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Uso de cada atributo para la toma de decisiones en el árbol (gráfica)
+ggplot(df_splits, aes(x = indice5, y = divisioness)) +
+  geom_bar(stat = "identity", fill = "pink") +
+  labs(title = "Porcentajes de uso de las variables para tomar decisiones",
+       x = "Variables",
+       y = "Porcentaje (%)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Sorprendetemente, podemos ver como para la construcción del árbol, las variables: `ACCOUNT_LENGTH` y `AMT_INCOME_TOTAL_DIS_2` se usan en un 100% y en un 62.85%, pero a la hora de la toma de decisiones en el árbol, es la variable `ACCOUNT_LENGTH` la que más protagonismo se lleva, con un 50%, frente al tan solo 25% de la variable `AMT_INCOME_TOTAL_DIS_2`, esto es algo que no esperábamos, sabiendo que la utilización de la variable `AMT_INCOME_TOTAL_DIS_2` es ligeramente mayor que el de la variable `ACCOUNT_LENGTH` para la construcción del árbol. No obstante, echando la vista atrás, como ya vimos en la PEC3, y como estamos viendo ahora, estos son dos conceptos diferentes.
+
+Hay que tener en cuenta, que la gran utilización de la variable `ACCOUNT_LENGTH`, tanto para construir el árbo, como para la toma de decisiones, se debe sobretodo, a la razón de que `ACCOUNT_LENGTH` fue exportada junto con la etiqueta `target` del juego de datos: `application_record.csv`, de ahí el gran protagonismo que tiene en la creación del modelo. Luego, en cuanto a pesos tanto en construcción como en la toma de decisiones, es la variable `AMT_INCOME_TOTAL_DIS_2` la que ocupa el segundo puesto, pues como se demostró en la PAC1, esta es la variable que mejor representada está (dentro del juego de datos) y la que mejor puede explicar el propio *dataset* de manera individual. 
+
+Finalmente, este estudio nos permite apreciar la importancia de la variable `ACCOUNT_LENGTH` frente al resto de variables.
+
+### Se comparan e interpretan los resultados (sin y con opciones de poda), explicando las ventajas e inconvenientes del modelo generado respecto a otro método de construcción.
+
+Notese como las explicaciones de los resultados se han llevado a cabo a lo largo de este ejercicio, simplemente por facilidad y comodidad del lector.
+
+La poda es una técnica utilizada en la construcción de árboles de decisión para evitar el ya comentado y famoso *overfitting* del modelo. El *overfitting* ocurre cuando el árbol se ajusta demasiado a los datos de entrenamiento, capturando patrones específicos que no son generalizables a nuevos datos. La poda supone recortar algunas de las ramas del árbol, eliminando ciertas subdivisiones que pueden haber sido creadas durante la construcción inicial del árbol.
+
+En la teroría, la poda asi como la "no poda" traen sus respectivas ventajas e inconvenientes. En el caso de no introducir una poda en el árbol, podríamos percibir las siguientes ventajas e inconvenientes:
+
+-   **Ventajas**: Puede capturar patrones complejos y sutiles en los datos de entrenamiento.
+-   **Inconvenientes**: Puede sobreajustar los datos de entrenamiento y tener un rendimiento deficiente en nuevos datos.
+
+Mientras que si podamos (dando por hecho que hemos logrado obtener anteriormente un buen árbol de decisión a partir de unos datos con buenas autocorrelaciones)
+
+-   **Ventajas**: Menos propenso al *overfitting* , generalización potencialmente mejorada a nuevos datos.
+-   **Inconvenientes**: Puede perder algunos detalles específicos del conjunto de entrenamiento, lo que podría afectar su capacidad para modelar patrones complejos.
+
+El único árbol sin poda que ha podido construirse, es el que puede verse en el primer apartado de este ejercicio. Por ello, a continuación, se va a aplicar una poda, para intentar disminuir el grado de *overfitting* que nuestro árbol inicial pueda tener, que seguramente sea muy elevado, debido a los resultados que se han obtenido.
+
+Construimos el mismo árbol, pero vamos a aplicar una serie de restricciones, para podarlo. En el caso de abajo, lo que hemos hecho es usar la función `C5.0Control()` donde hemos especificado el número mínimo de casos en un nodo, antes de considerar la partición del árbol, y el factor de confianza, que estipula la confianza mínima para realizar una división en el árbol.
+
+Para intentar mejorar los resultados, inicialmente se ha probado a aumentar el valor del nivel de confianza, pero no hemos conseguido mejorar la tasa de error del árbol. Como se puede ver abajo, se han obtenido exactamente los mismos resultados.
+
+<!-- Como se puede ver abajo, si uno aumenta la confianza hasta el 60% y deja el número mínimo de casos en 2, la variable `CNT_CHILDREN` entra en el árbol, pero sin función ninguna, ya que de ella resultan dos nodos terminales vacíos, aunque curiosamente, tras esta poda, se observa como el uso de las variables para la construcción del árbol ha cambiado drásticamente, ya que la utilización de las distintas variables para la construcción del árbol han pasado a tener los siguientes pesos: -->
+
+<!-- -   **AMT_INCOME_DIS_2**: (antes = 62'85%) tras la poda -\> 97'88% -->
+<!-- -   **ACCOUNT_LENGTH** : (antes = 100%) tras la poda -\> 87'54% -->
+<!-- -   **DAYS_EMPLOYED**: (antes = 7'37%) tras la poda -\> 9'17% -->
+
+<!-- Podemos ver una bajada considerable del peso de la variable *NAME_INCOME_TYPE*, aunque esto no repercute en el error de clasificación. -->
+
+```{r}
+library(ggplot2)
+library(grid)
+library(C50)
+
+# establecemos la semilla aleatoria para temas de reproducibilidad
+semilla_aleatoria = 1
+set.seed(semilla_aleatoria)
+
+# app_rec_kmeans_fin = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+#                                 "CNT_CHILDREN", "target", "ACCOUNT_LENGTH")]
+summary(df_app_rec22$AMT_INCOME_TOTAL_DIS_2)
+
+# creamos un data frame nuevo que contenga solo las columnas que queremos:
+selec_cols = c("AMT_INCOME_TOTAL_DIS_2","CNT_CHILDREN","ACCOUNT_LENGTH","DAYS_EMPLOYED","target")
+
+df_original_sub <- df_app_rec22[, selec_cols]
+head(df_original_sub)
+
+# ahora separamos el resto de variables de la etiqueta (variable a clasificar)
+y <- df_original_sub[,length(selec_cols)] # seleccionamos la columna de target
+x <- df_original_sub[,1:length(selec_cols)-1]
+head(x)
+
+# Ahora que ya hemos creado el nuevo conjunto de datos, procedemos a dividir y crear los nuevos conjuntos:
+split_prop <- 3
+indexes = sample(1:nrow(df_original_sub), size=floor(((split_prop-1)/split_prop)*nrow(df_original_sub)))
+trainx<-x[indexes,]
+trainy<-y[indexes]
+testx<-x[-indexes,]
+testy<-y[-indexes]
+
+# Ahora comprobamos los conjuntos, tal y como hicimos la primera vez, véase el siguiente *chunk* de código:
+summary(trainx)
+table(trainy)
+summary(testx)
+table(testy)
+
+# ahora comprobamos los proporciones
+tr = table(trainy)
+ts = table(testy)
+
+cat('\nEl porcentaje de registros destinados al training es:', (tr[1]+tr[2])*100/nrow(df_original_sub),"%, equivalente a: ",200/3, "%")
+cat('\nEl porcentaje de registros destinados al test es    :', (ts[1]+ts[2])*100/nrow(df_original_sub),"%, equivalente a: ",100/3, "%\n")
+
+# Ahora vamos a constuir el árbol a partir de los datos ya modificados.
+set.seed(semilla_aleatoria)
+trainy <- as.factor(trainy)
+
+# en este punto, aplicamos la poda
+poda <- C5.0Control(minCases = 2, CF = 0.6)
+
+# Construir el árbol con poda
+modelo_con_poda <- C50::C5.0(trainx, trainy, rules = TRUE, control = poda)
+summary(modelo_con_poda)
+
+modeloo <- C50::C5.0(trainx, trainy, control = poda)
+plot(modeloo,gp = gpar(fontsize = 8.5))
+```
+
+Vamos a calcular la matriz de confusión (el error no ha cambiado, asi que no deberíamos de ver ningún cambio sustancial)
+
+```{r}
+predicted_modelo <- predict(modelo_con_poda, testx, type="class" )
+print(predicted_modelo)
+print(sprintf("La precisión del árbol es: %.4f %%",100*sum(predicted_modelo == testy) / length(predicted_modelo)))
+
+# matriz de confusión
+cat("\n")
+mat_conf<-table(testy,Predicted = predicted_modelo)
+mat_conf
+```
+
+Como podemos comprobar, la precisión del árbol es exactamente la misma, que su antecesor sin poda.
+
+Ahora vamos a dejar la confianza en 0.6 y aumentamos el valor de minCases = 11, entonces se obtiene el siguiente resultado.
+
+```{r}
+library(ggplot2)
+library(grid)
+library(C50)
+
+# establecemos la semilla aleatoria para temas de reproducibilidad
+semilla_aleatoria = 1
+set.seed(semilla_aleatoria)
+
+# app_rec_kmeans_fin = df_app_rec[, c("AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED",
+#                                 "CNT_CHILDREN", "target", "ACCOUNT_LENGTH")]
+summary(df_app_rec22$AMT_INCOME_TOTAL_DIS_2)
+
+# creamos un data frame nuevo que contenga solo las columnas que queremos:
+selec_cols = c("AMT_INCOME_TOTAL_DIS_2","CNT_CHILDREN","ACCOUNT_LENGTH","DAYS_EMPLOYED","target")
+
+df_original_sub <- df_app_rec22[, selec_cols]
+head(df_original_sub)
+
+# ahora separamos el resto de variables de la etiqueta (variable a clasificar)
+y <- df_original_sub[,length(selec_cols)] # seleccionamos la columna de target
+x <- df_original_sub[,1:length(selec_cols)-1]
+head(x)
+
+# Ahora que ya hemos creado el nuevo conjunto de datos, procedemos a dividir y crear los nuevos conjuntos:
+split_prop <- 3
+indexes = sample(1:nrow(df_original_sub), size=floor(((split_prop-1)/split_prop)*nrow(df_original_sub)))
+trainx<-x[indexes,]
+trainy<-y[indexes]
+testx<-x[-indexes,]
+testy<-y[-indexes]
+
+# Ahora comprobamos los conjuntos, tal y como hicimos la primera vez, véase el siguiente *chunk* de código:
+summary(trainx)
+table(trainy)
+summary(testx)
+table(testy)
+
+# ahora comprobamos los proporciones
+tr = table(trainy)
+ts = table(testy)
+
+cat('\nEl porcentaje de registros destinados al training es:', (tr[1]+tr[2])*100/nrow(df_original_sub),"%, equivalente a: ",200/3, "%")
+cat('\nEl porcentaje de registros destinados al test es    :', (ts[1]+ts[2])*100/nrow(df_original_sub),"%, equivalente a: ",100/3, "%\n")
+
+# Ahora vamos a constuir el árbol a partir de los datos ya modificados.
+set.seed(semilla_aleatoria)
+trainy <- as.factor(trainy)
+
+# en este punto, aplicamos la poda
+poda <- C5.0Control(minCases = 11, CF = 0.6)
+
+# Construir el árbol con poda
+modelo_con_poda <- C50::C5.0(trainx, trainy, rules = TRUE, control = poda)
+summary(modelo_con_poda)
+
+modeloo <- C50::C5.0(trainx, trainy, control = poda)
+plot(modeloo,gp = gpar(fontsize = 8.5))
+```
+
+Como se puede comprobar, se obtiene un peor resultado, ya que el error de clasificación aumenta en un 1'1% subiendo hasta el 43'9%. Aunque tampoco hace falta ver el resultado análitico para darnos cuenta de la subida del error, ya que ahora solo hay una variable en el árbol, pero repetida dos veces.
+
+Vamos a calcular su precisión y matriz de confusión asociada,
+
+```{r}
+predicted_modelo <- predict(modelo_con_poda, testx, type="class" )
+print(predicted_modelo)
+print(sprintf("La precisión del árbol es: %.4f %%",100*sum(predicted_modelo == testy) / length(predicted_modelo)))
+
+# matriz de confusión
+cat("\n")
+mat_conf<-table(testy,Predicted = predicted_modelo)
+mat_conf
+```
+
+Como podemos comprobar la precisión ha bajado un 0.7824%, y por lo tanto, la suma de los TP y TN ha bajado 9 unidades respecto al resutlado anterior, y también 5 unidades respecto al árbol sin poda.
+
+En definitiva, hemos aplicado un modelo con varios tipos de poda, y sin poda. Implementando este concepto, hemos podido comprobar como no logra aumentar la calidad del árbol, y solo consigue empeorar la marca en un 1.4% si las restricciones impuestas son peores que las anteriores. Ahora bien, ¿porque los resultados no mejoran con la poda? pues sencillamente, porque los datos no son buenos. Ya hemos comentado en muchas ocasiones que los datos tienen muchas variables continuas, y que son muy heterogéneos, por lo que, los modelos que se han aplicado no pueden inferir los patrones más generalizados que hay debajo de ellos, para poder distinguir entre las dos clases deseadas. Esto no significa que la tarea de limpieza y procesado, que se llevó a cabo en la PAC1, no fuese acometida correctamente, todo lo contrario. Lo que está pasando, es que hay dos inconvenientes, el primero está relacionado con la baja correlación existente, entre las variables del *dataset* que hemos utilizado, y el segundo tiene que ver con el modo de introducir las etiquetas, ya que estás no deben de guardar mucha relación con el resto de variables, del *dataset* a pesar de que el modo en el que se han extraído es correcto y es muy similar al modo que puede verse en este enlace ((<https://www.kaggle.com/code/yashsharma1216/credit-card-approval-prediction/notebook>)) y donde el ususario obtiene resultados razonables en Python. Por lo tanto, a la hora de "podar" el árbol (introducir restricciones) simplemente tenemos poco márgen de maniobra y puede que en determinadas configuraciones de confianza y número de puntos, le estemos poniendo las cosas más dificíl al árbol para que mejore sus resultados, a pesar de que en algunos parámetros estemos ampliando márgenes, e.g., como disminuir el nivel de confianza o disminuir el número mínimo de puntos antes de tomar una decisión.
+
+Por último, cabe mencionar, que si se disminuye el número de puntos a 2 y la confianza a 0.1, entonces la precisión del árbol mejora la marca anterior (error de clasificación del 43.7 % ), y este solamente tendría 3 reglas en lugar de 4. No obstante, no se logra mejorar la marca del árbol sin poda.
+
+Ahora bien, comparando los árboles de decisión con el resto de algoritmos no supervisados, podemos mencionar las principales ventajas de este modelo, frente al resto de modelos implementados a lo largo de esta práctica, y es que estas ventajas se deben en gran parte a la gran intuitivad de los modelos generados por el paquete C50, ya que podemos obtener un árbol de decisión con sus reglas asociadas, lo que facilita la comprensión del funcionamiento del algoritmo a la hora de llevar a cabo la clasificación correspondiente. El único inconveniente que yo lo encuentro a este tipo de algoritmo supervisado, es que es el programador el que tiene que realizar la división de los grupos de datos que se usarán para el entrenamiento y posteriormente para el test del modelo. No osbtante, esto también tiene su punto positivo, y es que uno se asegura de conocer la estructura de datos que el modelo va a usar en cada momento y en caso de que hubiese algún problema con los sets de datos, (como nos ha pasado con el gran desbalance de clases) este se podría arreglar sin ninguna dificultad añadida.
+
+### Se evalúa la tasa de error en cada nivel de árbol, la eficiencia en la clasificación (en las muestras de entrenamiento y test) y la comprensibilidad del resultado.
+
+Las tasas de error en cada nivel del árbol (el mejor, en nuestro caso es el primero) las podemos calcular a partir de las reglas obtenidas.
+
+-   **REGLA 1** -\> Precisión: 68'4 %, error: 31'6 %, target=0
+-   **REGLA 2** -\> Precisión: 60'7 %, error: 39'3 %, target=0
+-   **REGLA 3** -\> Precisión: 65'0 %, error: 35'0 %, target=1
+-   **REGLA 4** -\> Precisión: 53'5 %, error: 46'5 %, target=1
+
+
+Podemos observar como la suma de errores para target=0 es de 70'9% mientras que para target=1 la suma del error es del 81.5%. Esto supone una mayor incertidumbre en la estimación de los clientes con riesgo alto, que en la estimación de los clientes con riesgo bajo. En términos prácticos, esto quiere decir que el modelo clasifica mejor los clientes de riesgo bajo que lo clientes de riesgo alto.
+
+Respecto a la eficiencia de la clasificación, tanto en las muestras de entrenamiento, como en las muestras de validación del modelo, esto lo hemos podido ver en el ejercicio de la matriz de confusión. En dicho ejercicio pudimos percatarnos de los errores en los sets de entrenamiento y test, además en el ejercicio anterior a este, pudimos ver como la precisión del modelo es del 48'04%, siendo este un resultado muy poco aceptable.
+
+Por los resultados obtenidos, nos damos cuenta además de que la variable `CNT_CHILDREN` no ha cobrado ningun papel dentro del árbol, no obstante el resto de variables, i.e., `AMT_INCOME_TOTAL_DIS_2`, `DAYS_EMPLOYED` y `ACCOUNT_LENGTH` han sido usadas en un 62'85%, 7'37% y 100% respectivamente. Por lo que la variable DAYS_EMPLOYED` no aporta mucha información al árbol.
+
+### Se comentan las conclusiones.
+
+Como se ha podido comprobar rápidamente, las etiquetas y los propios datos no son tan buenos, como para ser objeto de un modelo de clasificación binaria y supervisado de las mismas características implementado en este ejercicio. Si pudiésemos volver atrás, lo primero que deberíamos de tener en cuenta, es la discretización de más variables, pues como se ha podido ver con la discretización de la variable `AMT_INCOME_TOTAL_DIS_2`, esta acción ha tenido una muy buena repercusión en el modelo, cobrando la mayoría del protagonismo en las reglas del árbol (aunque para algunas configuraciones es `ACCOUNT_LENGTH` la que ha cobrado la mayoría del protagonismo) y siendo utilizada al 100% para ensamblarlo. Aunque con esto último, no nos referimos a que discretizando una variable, automáticamente esta vaya a acaparar todo el protagonismo, sino que se la está permitiendo cobrar su protagonismo justo y merecido dentro del juego de datos. Este protagonismo vendrá dado principalmente por el nivel de correlación que guarde con el resto de variables, y por la capacidad explicativa que tenga respecto al *dataset*.
+
+Se ha podido comprobar como la poda árboles no ha logrado mejorar los resultados de manera sustancial, simplemente porque los datos nos son muy buenos en cuanto a correlaciones, y pesa más esta falta de información en ellos, que las posibles mejoras que puedan introducir diferentes tipos de podas. Además, se ha comprobado como en algunos casos de poda, introducir distintos valores en las restricciones, podría empeorar los resultados, lógico, porque sería ponerle restricciones a un modelo que ya lo tiene muy dificíl clasificando registros.
+
+------------------------------------------------------------------------
+
+## Ejercicio 6
+
+Para este ejercicio me he servido de las siguientes páginas web, ya que he tenido algunos problemas con las conversiones de algunas variables:
+
+-   <https://www.datacamp.com/tutorial/k-nearest-neighbors-knn-classification-with-r-tutorial>
+-   <https://stackoverflow.com/questions/66466327/nas-introduced-by-coercionnas-introduced-by-coercionerror-in-knn>
+-   <https://stackoverflow.com/questions/55541215/i-get-the-error-nas-introduced-by-coercionnas-when-trying-to-run-knn-in-r>
+
+En este ejercicio vamos a implementar un modelo supervisado diferente del implementado en el anterior ejercicio. En teoría estudiamos dos tipos de modelos supervisados, aquellos basados en la vecindad, como el famoso KNN y los árboles de decisión (modelo implementado en el anterior ejercicio)
+Como ya hemos implementado varios modelos de árboles de decisión en el anterior ejercicio, en este nos centraremos en la aplicación del KNN (*k Nearest Neighbours*) en castellano, los k-vecinos más cercanos.
+
+El algoritmo KNN, tiene varias diferencias con los algoritmos tradicionales de clasificación supervisados, la primera es que es un algoritmo muy simple, pero con él se pueden obtener excelentes resultados, frente a otros algoritmos supervisados y de clasificación mucho más complejos. Otra diferencia principal, es que este algoritmo carece de fase de entrenamiento, por ello no se genera ningún modelo que posteriormente será implementado para clasificar nuevos registros, y este modus operandi es catalogado como método de aprendizaje vago.
+
+El funcionamiento de este algoritmo es muy sencillo, ya que para cada muestra nueva por clasificar, se calcula la distancia con todas las muestras del entrenamiento y se seleccionan las k muestras más cercanas. La etiqueta de la nueva muestra queda catalogada como la etiqueta mayoritaria entre sus k muestras vecinas.
+
+Ahora bien, como cualquier algoritmo de clasificación, el KNN tiene también sus desventajas. Por ello, el punto débil de este algoritmo, es su lentitud en la fase de predicción, que se debe al cálculo imprescindible de la distancia de la nueva muestra con respecto a todas las muestras del entrenamiento. Es por esta razón, que en conjuntos de entrenamiento muy voluminosos, este proceso puede alargarse un poco.
+
+Teniendo en cuenta el funcionamiento de este algoritmo, procedemos con su implementación.
+
+### Se prueba con una variación u otro enfoque algorítmico.
+Vamos con otra alternativa de separar los datos
+
+```{r}
+library(caTools)
+set.seed(255)
+
+# visualizamos primero los datos
+head(df_app_rec22)
+
+selec_cols = c("AMT_INCOME_TOTAL","CNT_CHILDREN","ACCOUNT_LENGTH","DAYS_EMPLOYED","target")
+df_app_rec222 = df_app_rec22[,selec_cols]
+
+split = sample.split(df_app_rec222$target, SplitRatio = 0.75)
+trainn = subset(df_app_rec222, split == TRUE)
+testt = subset(df_app_rec222, split == FALSE)
+
+# datos_entrenamiento <- na.omit(trainn)
+# datos_prueba <- na.omit(testt)
+
+print("Valores NULOS dentro del trainn")
+colSums(is.na(trainn))
+
+print("Valores NULOS dentro del testt")
+colSums(is.na(testt))
+
+# vamos a transformar todo a factor
+trainn[] <- lapply(trainn, factor)
+str(trainn)
+
+testt[] <- lapply(testt, factor)
+str(testt)
+
+# ahora que tenemos los conjuntos generados, aplicamos el algoritmo
+library(class)
+test_pred <- knn(
+                 train = trainn, 
+                 test = testt,
+                 cl = trainn$target, 
+                 k=2
+                 )
+```
+Hace falta notar una cosa, y es que se han querido replicar los conjuntos de entrenamiento y de test que se han creado para la implementación de árboles de decisión, pero no se ha podido, principalmente, porque el algoritmo k-means lanzaba un error cuando se incluía la columna `AMT_INCOME_TOTAL_DIS` o la columna `AMT_INCOME_TOTAL_DIS_2`. Esto puede deberse al tipo de variable, y al modo en el que se ha discretizado la variable. Por esta razón, se ha optado por usar la columna original, i.e., `AMT_INCOME_TOTAL`.
+
+Hace falta notar, que se han probado con diferentes combinaciones de variables, y con diferentes valores de k, por ello, los resultados que se muestran en el siguiente apartado, son fruto del modelo que se ha aplicado arriba, para k=2 y para la combinación de variables enunciada en el propio código.
+
+### Se detalla, comenta y evalúa la calidad de clasificación.
+
+Ya hemos desplegado el modelo, ahora tenemos que determinar como de buena ha sido la clasificación que el algoritmo ha llevado a cabo, para esta tarea, vamos a recurrir al cálculo de la matriz de confusión.
+
+Antes de calcular la matriz de confusión, vamos a recordar la forma que tenía, para leer los resultados más fácilmente. Véase la plantilla de la matriz de confusión que se ha producido con el siguiente código.
+
+```{r}
+cat("--------|--------\n\n")
+cat("   TP   |   FN   \n\n")
+cat("--------|--------\n\n")
+cat("   FP   |   TN   \n\n")
+cat("--------|--------")
+```
+
+Sabiendo la forma que tiene la matriz de confusión, procedemos a su cálculo.
+
+```{r}
+actual <- testt$target
+cm <- table(actual,test_pred)
+cm
+```
+
+Viendo el resultado de arriba, podemos asociar los valores a cada factor:
+
+
+-   `TP`= 142
+-   `FN`= 108
+-   `FP`= 111
+-   `TN`= 117
+
+En el caso del los `TP` podemos ver como 142 casos positivos que efectivamente son positivos, se han clasificado correctamente. Por lo tanto, de 250 clientes, se han clasificado correctamente 142, i.e., se han clasificado correctamente, el 56,8 % de los clientes en estado de bajo riesgo (target=0). Como se han clasificado correctamente 142/250, hay 108 clientes que han sido clasificados erróneamente, i.e., clientes que en la realidad cumplen con `target = 0` pero que nuestro árbol de clasificación ha etiquetado como `target = 1`. Son cifras pobres, pero como se ha dicho anteriomente, esto era de esperar.
+
+Luego, de los 228 clientes que hay en el subconjunto de datos para el *test* del modelo, 117 clientes han sido clasificados correctamente (`TN`), es decir, clientes de alto riesgo, i.e., (clientes con `target = 1`) y que han sido etiquetados como tal. Como hay 228 clientes en el juego de datos del `test`, los `TNs` consituyen la mayoría del total (el 51'32%), significando esto que para el caso de los clientes con `target = 1` se acierta un 51'32 %, y se clasifica erróneamente un 48'68 % de las veces (`FP`)
+
+Luego de estudiar la matriz de confusión, también podemos calcular la precisión sumando los valores de los TP (*True Positives*) de la matriz de confusión y dividiéndolos por la longitud total de las columnas objetivo.
+
+```{r}
+precision <- sum(diag(cm))/length(actual)
+sprintf("Precisión: %.2f%%", precision*100)
+```
+
+Como podemos observar, se obtiene una precisión del modelo del 54'18%, como sabemos por teoría y por experiencia de la PEC3, esto no es un valor aceptable, en términos generales. No obstante, contextualizando los resultados obtenidos con la base de datos, no diríamos que fuese un resultado horrible, ya que hay un gran desbalance de clases.
+
+### Se comparan los resultados de manera exhaustiva con el método supervisado del ejercicio 5.
+En este apartado vamos a comparar los resultados obtenidos en los dos ejercicios, se van a compara las matrices de confusión y las poporciones que hay dentro de ellas, así como la precisión del modelo obtenido en este ejercicio como la precisión del mejor modelo obtenido en el anterior ejercicio.
+
+Comparando los resultados obtenidos en este ejercicio con aquellos obtenidos en el ejercicio anterior. Podemos observar una clara mejoría en la precisión del modelo, aunque no muy alta, ya que en el mejor modelo del anterior ejercicio obtuvimos una precisión del 52'8951 % frente al 54'18 % que se ha obtenido en este ejercicio. Por lo tanto hay una diferencia del 1.2849 %, una diferencia muy pequeña, como para que pueda dar algo de esperanza sobre el juego de datos que se ha utilizado.
+
+Habiendo comparado la precisión de los dos modelos, vamos a meternos de lleno con las matrices de confusión, que son las que más información detallada nos pueden dar acerca del resultado de la clasificación. Comenzaremos comparando el nº de TP, FN, FP y TN. En el caso del modelo del ejercicio anterior, teníamos las siguientes métricas:
+
+-   `TP`= 152
+-   `FN`= 188
+-   `FP`= 113
+-   `TN`= 186
+
+Mientras que en el modelo de este ejercicio, se han obtenido los siguientes resultados:
+
+-   `TP`= 142
+-   `FN`= 108
+-   `FP`= 111
+-   `TN`= 117
+
+Primero que todo, hay que mencionar que las proporciones de datos entre el conjunto de datos de entrenamiento y test entre un modelo y otro no es el mismo. En el caso del ejercicio anterior, las proporciones para el conjunto destinado al entrenamiento y al test, son las siguientes: 66.63185 % y 33.36815 %, mientras que en este ejercicio es de 75 % (entrenamiento) y 25 % (test)
+
+Observando ambos resultados, vemos como en el ejercicio anterior, de 340 clientes se clasificaban solo 52 clientes bien, i.e., 44'7 %, frente a un 56'8 % obtenido en este ejercicio, observamos una diferencia del 12'1 %, por lo que de alguna manera, con este nuevo modelo hemos conseguido clasificar mejor los registros de la clase minoritaria (clientes con target = 1). Luego, si nos vamos al conjunto de datos de clientes de "alto riesgo", podemos observar como en el anterior ejercicio, de 299 clientes 186 estaban clasificados correctamente como "clientes de alto riesgo", es decir, el 62'2 %, mientras que en el modelo de este ejercicio, se han clasificado correctamente el 51'32 %, por lo que obtenemos un peor resultado de clasificación de clientes de alto riesgo en este nuevo modelo que en el anterior.
+
+Teniendo en cuenta los resultados de los dos modelos, y la comparativa del parráfo anterior, nos damos cuenta de que a pesar de haber mejorado en un 1.2849 % pasando de una precisión del 52,8951 % a una precisión del 54'18% no hemos conseguido eliminar del todo, el problema de la clasificación de registros pertenecientes a la clase minoritaria. Esto es importante, ya que este mismo error que hemos identificado en estos datos, lo identificamos en la PEC3. Para solucionar este asunto, a diferencia de la PEC3, en esta práctica se ha inframuestreado un conjunto notable y aleatorio de muestras pertenecientes a la clase mayoritaria, y hemos podido comprobar que esto nos ha funcionado, pero aún así, sigue habiendo una pequeña diferencia entre la proporción de clientes de bajo riesgo clasificados correctamente, y la proporción de clietnes de alto riesgo, clasificados correctamente. 
+
+Otra solución disponible al problema del desbalance de clases, puede ser añadir más datos, pero en nuestro caso no era algo realista, pues no había forma de generar 22 valores nuevos para cada registro nuevo que se desease añadir, además, el juego de datos ya tenía muchos registros (más de 400000)
+
+
+------------------------------------------------------------------------
+
+## Ejercicio 7
+
+### Se identifica qué posibles limitaciones tienen los datos que has seleccionado para obtener conclusiones con los modelos (supervisado y no supervisado)
+
+Los riesgos de utilizar el modelo que se ha desarrollado en esta práctica coindice con varios de los riesgos típicos que uno puede encontrarse en cualquier proyecto de minería de datos, algunos restricciones a tener en cuenta serían, la calidad de los datos, la representatividad de las muestras, restricciones temporales, desbalance de clases, dimensionalidad de datos, etc.  
+
+Aunque el juego de datos que se ha implementado en este proyecto no es malo como tal, si que presenta aspectos muy mejorables, y que pudimos haber hecho en la PAC1, pero que no se nos ocurrió. Para empezar, podríamos haber discretizado más variables, tal y como hemos hecho con la variable `AMT_INCOME_TOTAL`, pues como pudimos ver, acometer esta acción nos permitió obtener un árbol con reglas (aunque no de muy buena calidad) si hubiésemos tenido más tiempo podríamos haber discretizado la variable `ACCOUNT_LENGTH` ya que era una variable con bastante peso dentro del *daatset*, o muchas otras. Luego, como ya se ha comentado a lo largo de este proyecto, y en relación a la calidad de los datos, se podrían haber extraído las etiquetas de otra forma, de tal manera que hubiese más relación entre las etiquetas y el resto de variables del juego de datos en el cual se estaban exportando las etiquetas. No obstante, esto habría resultado muy difícil, ya que en realidad hemos tratado con dos datasets, y las etiquetas que hemos usado, a pesar de estar asociadas a un cliente (presente en el otro *dataset* junto con sus atributos correspondientes) las hemos generado en un dataset que no es con el que se ha trabajado, a pesar de que posteriormente, estas han sido atribuidas a los usuarios a los que les correspondía ya que en los dos juegos de datos teníamos una columna llamada "ID". En definitiva, deberíamos de haber discretizado más variables, y haber elegido un dataset, con las etiquetas ya incluidas.
+
+Respecto a la representatividad de las variables, este tema tiene que ver con la representación y el peso que tienen cada una de las variables en el juego de datos. Esto es algo importante, ya que como pudo verse en la PAC1, solamente las variables "AMT_INCOME_TOTAL" y "DAYS_BIRTH" eran las que mejor representadas estaban, y luego "DAYS_BIRTH" no ha resultado ser una variable muy útil, puede ser porque no se haya discretizado, pero la verdad que a simple vista, no parece que tuviese una gran relación entre los días restantes del cumpleaños de un cliente, y el grado de riesgo del cliente. 
+Por lo tanto, han sido pocas variables en este proyecto las que han contributido de verda a la generación de conocimiento, por lo que una de las grandes limitaciones de esta práctica está en la baja correlación que hay entre variables, y la baja representatividad de la mayoría de las variables en el conjunto del juego de datos.
+
+Otra posible restricción podría ser la temporalidad, y esque desconocemos la fecha en la que se han ido añadiendo los clientes al juego de datos, a pesar de conocer la antigüedad de la cuenta, gracias a la variable que añadimos: `ACCOUNT_LENGTH`. Esto es algo que debería de haber sabido pero que no puedo, porque no hay información al respecto. No osbtante, esto no tiene la misma prioridad que la calidad de los datos o la representatividad de algunas variables.
+
+El desbalance de clases, esta es probablemente una de las restricciones más importantes, junto con la calidad de los datos y la representatividad de los datos. A lo largo del proyecto se ha podido ver claramente, como el desbalance inicial que había de clases, era monumental, y por ello se cree que esto ha penalizado muy negativamente a los modelos no supervisados. Aunque se han introducido mejoras a lo largo del proyecto, para apliar estos efectos, se tendría que haber aplicado al principio del proyecto, pero esto es algo que no se me ocurrió en su momento.
+
+La dimensionalidad de los datos, también puede ser una restricción, ya que incialmente teníamos 22 características/variables, y aunque se realizó una gran tarea de procesado y estudio en la PAC1, puede que no hayamos descubierto otras relaciones existentes entre otras variables, que nos hubiese hecho la vida más fácil en esta práctica. Por lo tanto, si hubiésemos tenido menos variables, habríamos estudiado más relaciones y posiblemente habríamos seleccionado mejor, las variables que le debíamos  de introducir a los modelos (sobretodo a los modelos supervisados)
+
+### Se identifican posibles riesgos del uso del modelo (mínimo 300 palabras).
+
+Los riesgos del uso de este modelo, e.g., en proyectos futuros, son múltiples, y tienen que ver con la mayoría de las restricciones expuestas en el anterior apartado de este ejercicio.
+
+Como se ha mencionado, la práctica nos ha mostrado múltiples limitaciones que podrían afectar a la idoneidad y efectividad del modelo propuesto. En primer lugar, la falta de discretización en varias variables, como 'ACCOUNT_LENGTH', podría impactar negativamente la calidad de los datos y la capacidad del modelo para extraer patrones, pues como se ha visto por los resultados, seguramente el grado de overfitting fuese un poco elevado. No osbtante, la discretización de estas variables podría haber mejorado la interpretabilidad y precisión del modelo, particularmente al considerar que ciertas variables tenían un peso considerable dentro del dataset, pero también es cierto que era muy poco el peso que tenían todas las variables en general, y se cree que esto se debe a que son variables con una baja relación entre ellas.
+
+Otro riesgo importante identificado es el desbalance inicial de clases, que ha sido reconocido como una restricción significativa. Aunque se implementaron mejoras para abordar este desbalance posteriormente en el proyecto, podríamos haber mejorado sustancialmente el rendimiento de los modelos no supervisados y haber obtenido mejores resultados. La baja correlación entre variables y la baja representatividad de la mayoría de ellas también es importante, puesto que afecta a la generación de conocimiento valioso. La elección de variables más relevantes desde el inicio podría haber mejorado la capacidad del modelo para hacer predicciones precisas y relevantes.
+
+La temporalidad también es una limitación importante. La falta de información sobre la fecha de inclusión de los clientes en el dataset puede afectar la capacidad del modelo para capturar patrones. Es por esto, que esta limitación remarca la importancia de datos temporales precisos para mejorar la calidad de las predicciones y la capacidad del modelo para adaptarse a cambios a lo largo del tiempo.
+
+La alta dimensionalidad inicial con 22 variables es otra restricción que podría haber facilitado la aplicación de modelos. Reducir la dimensionalidad desde el principio podría haber facilitado la exploración y selección de características más efectivas. Además, no haber discretizado variables como DAYS_BIRTH puede haber introducido sesgo en el modelo, pues esta variable, junto con `AMT_INCOME_TOTAL` son las únicas variables con un peso considerable en el *dataset*. La consideración de la interpretabilidad desde el inicio podría haber facilitado la comprensión y aceptación del modelo por parte de usuarios no técnicos.
+
+Si hubiésemos abordado estas limitaciones desde el principio del proyecto podríamos haber obtenido modelos con menos errores, a pesar de que en general, las variables del juego de datos, no estuviesen tan cohesionadas, como deberían de haberlo estado. Estos riesgos potenciales subrayan la importancia de una cuidadosa consideración de la calidad de los datos, la representatividad de las variables, la temporalidad y la dimensionalidad para garantizar la eficacia del modelo en entornos del mundo real.
+
+Ahora bien, si nos centramos en los riesgos de la implementación de cada uno de los modelos que se han implementado en esta práctica, entonces la narrativa es diferente, y habría que abordar cada modelo por separado.
+
+Comenzando por el modelo de clasificación, no supervisado  k-means, podinos ver como este algoritmo arrojaba resultados aceptables, aunque no muy buenos. En su momento explicamos que esto podía deberse a los propios datos, como ya hemos venido diciendo a lo largo de todo este proyecto. Una dificultad añadida a la aplicación de este modelo en nuestro juego de datos es que nosotros queremos clasificar solamente dos clases de registros y debido a que las variables no guardan una gran correlación entre ellas, al tener tantos registros y seleccionar solamente un pequeño puñado de variables, este algoritmo no es capaz de extraer la pequeña relación que hay entre variables, por lo que el posicionamiento de muchos registros, en el espacio, no es óptimo y a la hora de clasificar los registros en función de las distancias que el algoritmo computa, muchos resgistros caen en el clúster incorrecto.
+
+Seguidamente, comparando los resultados que se han obtenido con otras distancias, observamos como la distancia de Mahalanobis no arrojaba mejores resultados, de hecho en algunos casos empeoraba la marca, ya que el cálculo de esa distancia contempla la densidad del espacio muestral, algo que impacta negativamente en la clasificación de registros en distintos clústers, ya que los datos son muy heterogéneos entre ellos y no muestran un patrón lo suficientemente obvio, como para que el algoritmo los clasifique en sus clústers correspondientes. Por ello, a la hora de aplicar este algoritmo, veíamos como los extremos de las zonas más pobladas, eran clasificados en el otro cluster debido a estar en zonas menos pobladas, a pesar de ser esto incorrecto. Por ello, el riesgo de aplicar el algoritmo k-means con este tipo de distancia, puede ser mayor que si se hace con la distancia euclidiana.
+
+Luego, se aplicó el algoritmo de OPTICS y DBSCAN, donde tampoco se llegaron a obtener resultados impresionantes debido, de nuevo, a la naturaleza de los datos. A pesar de ello, estos dos algoritmos ofrecen la posibilidad de cambiar parámetros como épsilon o el número mínimo de puntos, que, como se pudo comprobar, podían mejorar los resultados, disminuyendo el nivel de ruido en las gráficas y ofreciendo la posibilidad de obtener el número de clústers deseado. No obstante, nunca se obtenían menos de tres, algo que desde el punto de vista de los datos es incorrecto, porque solo tenemos dos clases. 
+
+Teniendo en cuenta esto y los resultados que se obtuvieron del coeficiente de la silueta, así como los resultados obtenidos con la aplicación de los modelos supervisados, se cree que la aplicación de los modelos no supervisados incurre en un mayor riesgo, puesto que a pesar de que se tiene la potestad de poder determinar el número de grupos deseados, la distancia mínima entre puntos, u otros parámetros, estos algoritmos no logran detectar que solamente hay dos clases. Se sabe perfectamente que esto se debe a la naturaleza de los datos, pero esto no quita que este aspecto sea el más importante a la hora de querer clasificar una serie de registros. Y por ello, se cree que la aplicación de un modelo supervisado como el de los árboles de decisión o el propio KNN, acarrea un menor riesgo, entre otras cosas, porque que el programador interviene en la preparación de los datos y en la obtención del modelo.
+
+En definitiva, aparte de los resultados que se han obtenido, desde mi punto de vista creo que los modelos supervisados son más transparentes, más interpretables, y más modificables que los algoritmos, no supervisados disponibles en la plataforma R.
