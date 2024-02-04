@@ -1,0 +1,1548 @@
+---
+title: 'Minería de datos: PRA1 - Selección y preparación de un juego de datos'
+author: "Autor: Pablo Suárez"
+date: "Noviembre 2023"
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    includes:
+      in_header: 75.584-PEC-header.html
+  word_document: default
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+------------------------------------------------------------------------
+
+# Enunciado
+
+------------------------------------------------------------------------
+
+Todo estudio analítico debe nacer de una necesidad por parte del
+**negocio** o de una voluntad de dotarle de un conocimiento contenido en
+los datos y que solo podremos obtener a través de una colección de
+buenas prácticas basadas en la Minería de Datos.
+
+El mundo de la analítica de datos se sustenta en 3 ejes:
+
+A. Uno de ellos es el profundo **conocimiento** que deberíamos tener
+**del negocio** al que tratamos de dar respuestas mediante los estudios
+analíticos.
+
+B. El otro gran eje es sin duda las **capacidades analíticas** que
+seamos capaces de desplegar y en este sentido, las dos prácticas de esta
+asignatura pretenden que el estudiante realice un recorrido sólido por
+este segundo eje.
+
+C. El tercer eje son los **Datos**. Las necesidades del Negocio deben
+concretarse con preguntas analíticas que a su vez sean viables responder
+a partir de los datos de que disponemos. La tarea de analizar los datos
+es sin duda importante, pero la tarea de identificarlos y obtenerlos va
+a ser para un analista un reto permanente.
+
+Como **primera parte** del estudio analítico que nos disponemos a
+realizar, se pide al estudiante que complete los siguientes pasos:
+
+1.  Plantear un problema de analítica de datos detallando los objetivos
+    analíticos y explica una metodología para resolverlos de acuerdo con
+    lo que se ha practicado en las PEC y lo que se ha aprendido en el
+    material didáctico.
+
+2.  Seleccionar un juego de datos y justificar su elección. El juego de
+    datos **deberá tener capacidades** para que se le puedan aplicar
+    **algoritmos supervisados**, **algoritmos no supervisados** y
+    **reglas de asociación** y deberá estar alineado con el problema
+    analítico planteado en el paso anterior.
+
+**Requisito mínimo**: El juego de datos deberá tener como mínimo 500
+observaciones con un mínimo de 5 variables numéricas, 2 categóricas y 1
+binaria. Además **debe ser distinto**, es importante que no sea un
+dataset usado en las PEC anteriores.
+
+Adjuntamos aquí una lista de portales de datos abiertos para seleccionar
+el juego de datos. Se pueden usar otras fuentes para obtener vuestro
+juego de datos, pero recordad de citarlas:
+
+-   **Datos abiertos**
+    -   [Google Dataset
+        Search](https://datasetsearch.research.google.com/)
+    -   [Datos abiertos
+        España](https://datos.gob.es/es/catalogo?q=&frequency=%7B%22type%22%3A+%22months%22%2C+%22value%22%3A+%221%22%7D&sort=score+desc%2C+metadata_modified+desc)
+    -   [Datos abiertos
+        Madrid](https://datos.madrid.es/portal/site/egob/)
+    -   [Datos abiertos
+        Barcelona](https://opendata-ajuntament.barcelona.cat/es/)
+    -   [Datos abiertos Londres](https://data.london.gov.uk/)
+    -   [Datos abiertos New York](https://opendata.cityofnewyork.us/)
+-   **Conjuntos de datos para aprendizaje automático e investigación**
+    -   [UCI Machine
+        Learning](https://archive.ics.uci.edu/ml/datasets.php)
+    -   [Datasets for machine-learning research
+        (Wikipedia)](https://en.wikipedia.org/wiki/List_of_datasets_for_machine-learning_research)
+    -   [Kaggle datasets](https://www.kaggle.com/datasets)
+
+3.  Realizar un análisis exploratorio del juego de datos seleccionado.
+
+4.  Realizar tareas de limpieza y acondicionado para poder ser usado en
+    procesos de modelado.
+
+5.  Realizar métodos de discretización
+
+6.  Aplicar un estudio PCA sobre el juego de datos. A pesar de no estar
+    explicado en el material didáctico, se valorará si en lugar de PCA
+    investigáis por vuestra cuenta y aplicáis SVD (Single Value
+    Decomposition).
+
+-   **Algunos recursos**
+    -   [PCA para reducción de
+        dimensiones](https://www.aprendemachinelearning.com/comprende-principal-component-analysis/)
+    -   [SVD Singular Value
+        Decomposition](https://web.mit.edu/be.400/www/SVD/Singular_Value_Decomposition.htm)
+
+Recordad que para todas las PRA es **necesario documentar** en cada
+apartado del ejercicio práctico que se ha hecho, por qué se ha hecho y
+cómo se ha hecho. Asimismo, todas las decisiones y conclusiones deberán
+ser presentados de forma razonada y clara, **contextualizando los
+resultados**, es decir, especificando todos y cada uno de los pasos que
+se hayan llevado a cabo para su resolución. Por último, incluid una
+**conclusión final** resumiendo los resultados obtenidos en la práctica
+e indicad eventuales **citaciones bibliográficas**, fuentes
+internas/externas y materiales de investigación.
+
+-   **Documento entregable**
+
+Solo hay que entregar el documento html y hay que hacerlo con el
+siguiente nombre 75.584-PRA1-NombreEstudiante.html
+
+------------------------------------------------------------------------
+
+# Recursos de programación
+
+------------------------------------------------------------------------
+
+-   Incluimos en este apartado una lista de recursos de programación
+    para minería de datos donde podréis encontrar ejemplos, ideas e
+    inspiración:
+    -   [Material adicional del libro: Minería de datos Modelos y
+        Algoritmos](http://oer.uoc.edu/libroMD/)
+    -   [Espacio de recursos UOC para ciencia de
+        datos](http://datascience.recursos.uoc.edu/es/)
+    -   [Buscador de código R](https://rseek.org/)
+    -   [Colección de cheatsheets en
+        R](https://www.rstudio.com/resources/cheatsheets/)
+
+------------------------------------------------------------------------
+
+# Solución
+
+------------------------------------------------------------------------
+
+## Planteamiento
+
+Como se ha podido ver por el enunciado, esta PRA1 se centra en la
+primera parte de un proyecto típico de minería de datos. Habiendo dicho
+esto, ahora se comienza con la definición del objetivo analítico.
+
+Los últimos tres meses del año suelen ser meses de muchos cumpleaños y
+fiestas, por no mencionar las navidades, que poco a poco se van
+acercando, y con ello el aumento de compras, rebajas, y gastos
+significativos de dinero. Es por esto, que cada vez más gente opta por
+adquirir tarjetas de crédito, ya que pemiten pagar en cuotas, ofrecen
+descuentos, permiten gastos de emergencia (en caso de no tener ahorros)
+y facilitan el ahorro de dinero en intereses. No obstante, este tipo de
+tarjetas son un arma de doble filo, ya que favorecen las compras
+desmedidas y el endeudamiento, así como incrementar la deuda existente,
+y esto es algo que los bancos quieren evitar a toda costa. Es por esto,
+que las entidades bancarias, tienen que tener claro a quien pueden darle
+una tarjeta de crédito, y a quien no. Por lo tanto, el principal
+objetivo analítico de este estudio, y consecuentemente, el objetivo de
+este proyecto de minería de datos, es el de predecir si un cliente, es o
+no apto, para adquirir una tarjeta de crédito, en base a información
+real y personal, pero no comprometedora que una entidad bancaria ha
+publicado.
+
+Adicionalmente, con este estudio analítico se pretende dar un paso más
+grande, definiendo un objetivo más general, pero aun más prometedor:
+detectar/predecir el fraude. Esto se pretende acometer con la base de
+datos que se va detallar más adelante. Pero básicamente, si se es capaz
+de clasificar personas "aptas" y "no aptas", para obtener una tarjeta de
+crédito, a partir del *dataset* original y del conocimiento que se ha
+extraído de él, se podrían detectar comportamientos fraudulentos. Esto
+es relevante, pues el fraude es algo que afecta a cualquier ámbito del
+mercado y del sector bancario, puesto que todo tiene un valor y alguien
+tiene que pagarlo.
+
+Tanto el objetivo de este estudio analítico mencionado antes, como el
+objetivo posterior (detectar/predecir el fraude) constituyen un plan de
+beneficio asegurado para los bancos y mercados, pues, conocer quien
+puede optar a una tarjeta de crédito y quien no puede, así como detectar
+el fraude, se traduce en pérdidas que el banco puede evitar, o incluso
+ganancias en diversos ámbitos: dinero, buena fama, confiable, etc. Y por
+último, estas ganancias, se pueden traducir en confianza por parte de
+los mercados hacía las entidades bancarias.
+
+Como lo que se quiere, es predecir si un perfil de cliente es o no apto
+para adquirir una tarjeta de crédito, la tarea que se llevará a cabo,
+será la de clasificación de perfiles de clientes. En este caso, la tarea
+de clasificación, será de naturaleza binaria, puesto que solo existen
+dos etiquetas, apto o no apto. Esto que se acaba de decir, se puede
+definir matemáticamente de la siguiente manera:
+
+Sea $\hat{y}$ la estimación llevada a cabo por el modelo de
+clasificación binario, esto implica, que por definción, $\hat{y}$ solo
+tomará dos valores, i.e., $\hat{y} \in [0,1]$ dónde:
+
+-   $0 := cliente \hspace{1mm} ``no \hspace{1mm} apto''$
+-   $1 := cliente \hspace{1mm} ``apto''$
+
+Varios ejemplos de modelos predictivos serían los arboles de decisión y
+un ejemplo más contemporáneo serían las series temporales construidas
+por redes neuronales. No obstante, de esto se hablará en etapas
+posteriores del proyecto.
+
+Este objetivo analítico se centra en intentar asignar una etiqueta, en
+este caso, "apto" o "no apto", a un registro caracterizado por un
+conjunto de variables específicas. A partir de este objetivo analítico
+se podrían derivar algunos objetivos intermedios que también podrían
+formar parte de otro proyecto de minería de datos, pero que en este
+caso, resultan ser imprescindibles para lograr dicho objetivo principal.
+Estos objetivos son:
+
+-   Reconocer factores de riesgo en los clientes/registros (identificar
+    las variables más importantes).
+-   Medir el impacto/peso de las variables en las
+    tendencias/comportamientos de los registros,
+-   Clasificación de clientes, o segmentación en grupos, dependiendo de
+    su grado de "idoneidad" para optar a una tarjeta de crédito.
+-   Tendencia de valores en los distintos atributos
+
+Como se ha visto en teoría, en PECs anteriores y en el caso práctico de
+este tema, la metodolgía que se va seguir para cumplir con el objetivo
+analítico principal, y el resto de los antes mencionados, es la
+siguiente:
+
+-   Establecimiento del objetivo analítico y la metodología.
+
+-   Selección del juego de datos.
+
+-   Verificación del juego de datos.
+
+-   Preprocesado de los datos (limpieza y acondicionamiento):
+
+    -   Comprobación de errores de escritura.
+    -   Comprobación de errores en los valores.
+    -   Comprobación y gestión de valores nulos.
+    -   Comprobación y gestión de atributos vacíos.
+
+-   Análisis exploratorio del juego de datos:
+
+    -   Cálculo de medias, medianas.
+    -   Determinación de correlaciones entre variables y los motivos que
+        las justifican.
+    -   Determinar las distribuciones de los datos.
+    -   Normalizar datos.
+    -   Simplificaciones decimales.
+    -   Transformaciones de escala.
+    -   Pasar datos numéricos a categóricos y agrupar valores.
+    -   Creación de un nuevo atributo.
+
+-   Limpieza de datos
+
+-   Implementación de técnicas de discretización.
+
+-   Aplicación de técnicas PCA y SVD en el juego de datos.
+
+Cabe destacar, que dependiendo de las calidad del juego de datos, habrá
+pasos de la metodología que no serán necesarios.
+
+Habiendo explicado el objetivo analítico principal y el resto de
+objetivos, así como la metodología que se pretende seguir, se podrían
+definir las métricas que nos van a ayudar a determinar el grado de
+cumplimiento del objetivo analítico. A voz de pronto, la pimera métrica
+que nos viene a la cabeza es la precisión, y como el proyecto lo voy a
+desarrollar yo, diría que una precisión a partir del 75% sería
+razonable, dependiendo del número de variables que el modelo de
+clasificación tenga en cuenta claro. No obstante, considero que es muy
+pronto para determinar la precicisión mínima, sin explorado ni siquiera
+el *dataset*
+
+Otra métrica interesante es la exactitud, que se define como el número
+de muestras para las que el modelo ha predicho bien su clase, frente al
+número total de muestras.
+
+En el caso de que a lo largo del proyecto de minería de datos, haya un
+desbalance de clases, la métrica de la exactitud, podría arrojar
+resultados confusos, es por esto, que si se diese el caso de un
+desbalance de clases, se podrían tener en cuenta las métricas de **TP**
+(*True Positive*), **FP** (*False Positive*), **TN** (*True Negative*),
+**FN** (*False Negative*).
+
+No osbtante, estas son métricas propias de un sistema de clasificación
+supervisado, es decir, ya se sabe que registros son "aptos" o "no
+aptos", pero en este caso no se dispone de esta información por lo
+tanto, nuestro proyecto de clasificación, será **no supervisado**.
+
+## Selección del juego de datos
+
+El juego de datos utilizado en este estudio analítico se corresponde con
+la información personal de un conjunto de candidatos interesados en
+obtener una tarjeta de crédito. A partir de esta información se va a
+determinar que candidatos son o no aptos para obtener una tarjeta de
+crédito. El juego de datos puede encontrarse
+[aquí](https://www.kaggle.com/datasets/rikdifos/credit-card-approval-prediction/data).
+
+Se ha seleccionado este *dataset* debido a su gran variedad en cuanto a
+tipos de variables, que pueden ayudar en el estudio analítico. No
+obstante, como en cualquier proyecto de minería de datos, habrá
+variables que no se usarán o que deberán de ser eliminadas, en caso de
+no aportar conocimiento o contaminar el ya obtenido.
+
+El *dataset* está compuesto por 438558 registros, y 18 variables, las 18
+variables se detallan a continuación:
+
+-   **ID**: el identificador de cliente.
+-   **CODE_GENDER**: género. "M" *male*, "F" *female*.
+-   **FLAG_OWN_CAR**: ¿tiene coche? "Y" *yes,* "N" *no*
+-   **FLAG_OWN_REALTY**: ¿tiene propiedad? "Y" *yes,* "N" *no*
+-   **CNT_CHILDREN**: número de hijos. $\mathbb{R}_+$
+-   **AMT_INCOME_TOTAL**: salario anual. $\mathbb{R}_+$
+-   **NAME_INCOME_TYPE**: categoria salarial.
+-   **NAME_EDUCATION_TYPE**: nivel educativo.
+-   **NAME_FAMILY_STATUS**: estado civil.
+-   **NAME_HOUSING_TYPE**: tipo de casa.
+-   **DAYS_BIRTH**: cumpleaños (cuenta hacia atrás) e.g., "0" cumpleaños
+    es el día actual, "-1" el cumpleaños fue ayer, "-14" el cumpleaños
+    fue hace dos semanas. $[\mathbb{R}_{-},0]$
+-   **DAYS_EMPLOYED**: número de días empleado (cuenta hacia atrás)
+    e.g., si el número de días es positivo, quiere decir que la persona
+    está desempleada. $\mathbb{R}_{\pm}$
+-   **FLAG_MOBIL**: ¿tiene teléfono móvil? $[0,1]$
+-   **FLAG_WORK_PHONE**: ¿tiene teléfono móvil de trabajo? $[0,1]$
+-   **FLAG_PHONE**: ¿tiene teléfono? $[0,1]$
+-   **FLAG_EMAIL**: ¿tiene correo electrónico? $[0,1]$
+-   **OCCUPATION_TYPE**: ocupación.
+-   **CNT_FAM_MEMBERS**: número de integrantes del núcleo familiar.
+    $\mathbb{R}_+$
+
+Esperemos no tener problemas al tratar con los datos, ya que es una
+cantidad ingente de resgistros (438558).
+
+Por último, cabe destacar que el *dataset* elegido, en principio, solo
+se contempla para detectar si un cliente es o no apto para optar a una
+tarjeta de crédito. No obstante, con la adición de registros externos y
+variables adicionales, se podría expandir el horizonte de objetivos
+analíticos, para perseguir otros obejtivos con el *dataset*, aunque para
+el objetivo relacionado con el fraude, el *dataset* original, debería de
+ser suficiente.
+
+Por último, mencionar que este *dataset* puede ser objeto de modelos
+supervisados (con etiquetas, i.e., se conoce el resultado) y no
+supervisados (sin etiquetas, i.e., principalmente para la búsqueda de
+características). Importante, aunque en el propio dataset no haya una
+variable/columna binaria, que muestre, si el candidato es apto o no a
+optar a una tarjeta de crédito, dentro del zip del *datset* que se ha
+descargado, hay otro dataset llamado "credit_record.csv" que puede
+resolver este problema y que tiene las siguientes variables (columnas):
+
+-   **ID**: el identificador de cliente
+
+-   **MONTHS_BALANCE**: en este caso, el mes de los datos extraídos es
+    el punto de partida, hacia atrás, 0 es el mes actual, -1 es el mes
+    anterior, y así sucesivamente
+
+-   **STATUS**
+
+    -   "0": 1-29 días de demora.
+    -   "1": 30-59 días de demora.
+    -   "2": 60-89 días de demora.
+    -   "3": 90-119 días de demora.
+    -   "4": 120-149 días de demora.
+    -   "5": Deudas vencibles o incobrables, cancelaciones de más de 150
+        días.
+    -   "C": Cancelado ese mes.
+    -   "X": Sin préstamo este mes.
+
+Cada fila representa la condición de un cliente en diferentes meses, por
+lo que es una tabla extremadamente larga (ver este enlace: [discusion
+del
+dataset](https://www.kaggle.com/datasets/rikdifos/credit-card-approval-prediction/discussion/119320))
+
+Este *dataset* tiene múltiples filas de información de cada candidato
+del *dataset* "application_record.csv" a cerca de su estado financiero.
+Por lo tanto, a fin de poder aplicar un modelo supervisado en el futuro
+*dataset* "application_record.csv" (una vez limpio y acondicionado) se
+podría crear una columna "apto o no apto" que contenga o 1s o 0s,
+dependiendo de si, en alguno de los históricos de cada uno de los
+candidatos que se muestran en "credit_record.csv" aparecen muchos "4s" o
+un "5" o una "C" en la variable "STATUS" (por lo tanto 0: no apto). Por
+último, esta nueva columa, se exportaría al *dataset*
+"application_record.csv" final.
+
+Otro criterio, para generar que el propio autor ofrece, es el de llevar
+a cabo un "analisis de antigüedad, del inglés: *"Vintage Analysis"* con
+los dos *datasets*. Este tipo de analisis es ampliamente conocido y muy
+utilizado para gestionar el riesgo de crédito, que ilustra el
+comportamiento financiero de un cliente tras la apertura de su cuenta.
+Basándose en el mismo periodo de apertura, este analisis permite
+calcular el ratio de impago de una cartera de préstamos (véase más
+información de esto aquí: [EDA & Vintage
+Analysis](https://www.kaggle.com/code/rikdifos/eda-vintage-analysis/notebook))
+
+Este criterio que aplicaré a la hora de querer aplicar el modelo, se ha
+tomado en base a la lógica y a la siguiente referencia de BBVA
+Argentina:
+[BBVA](https://www.bbva.com.ar/economia-para-tu-dia-a-dia/ef/tarjeta-de-credito/tarjeta-de-credito-con-veraz-en-argentina.html#:~:text=Con%20un%20Veraz%20negativo%20vigente,de%20cr%C3%A9dito%20a%20su%20medida.).
+
+## Análisis exploratorio del juego de datos, limpieza y acondicionado
+
+Primero se cargan todas las librerías que podrían necesitarse a lo largo
+del estudio:
+
+```{r}
+# install.packages("magrittr") # package installations are only needed the first time you use it
+# install.packages("dplyr")    # alternative installation of the %>%
+library(magrittr) # needs to be run every time you start R and want to use %>%
+library(dplyr)    # alternatively, this also loads %>%
+```
+
+Conocidas las variables de cada uno de los registros, ahora se procede a
+exportar el csv para empezar a explorar más en profundidad el juego de
+datos:
+
+```{r}
+nombre_archivo = 'application_record.CSV'
+df_original <- read.csv(nombre_archivo)
+structure = str(df_original) 
+```
+
+Como se puede ver, hay 8 variables de tipo "int", 8 variables de tipo
+"chr" y dos variables de tipo "num". Esto significa que se están
+cumpliendo los requisitos enunciados en el punto 2 del enunciado,
+relativos al *dataset*, pues además se sabe, que hay más de 500
+registros. No obstante, ahora se va a ver gráficamente esta propoción
+que se acaba de dar:
+
+```{r}
+tipos_de_datos <- function(df_original) {
+  res <- lapply(df_original, class)
+  res_frame <- data.frame(unlist(res))
+  barplot(table(res_frame), main="Tipos de datos", col="steelblue", ylab="Number of Features")
+}
+
+tipos_de_datos(df_original)
+```
+
+Ahora se visualizan las primeras y últimas filas del juego de datos
+
+```{r}
+head(df_original)
+tail(df_original)
+```
+
+Oficialmente, el juego de datos con el que vamos a tratar, tiene 438557
+filas.
+
+Ahora se van a comprobar si hay valores NULOS o vacíos en cada uno de
+los registros. Primero se comienza con los valores NULOS:
+
+```{r}
+print("Valores NULOS dentro del df_original")
+colSums(is.na(df_original))
+```
+
+Como se puede comprobar, no hay ningún valor nulo en el *dataframe*.
+Ahora pasamos a comprobar si hay valores vacíos:
+
+```{r}
+print("Valores vacíos dentro del df_original")
+colSums(df_original == '')
+
+#Cálculo del porcentaje de registros con una celda vacía respecto al total
+print(134203*100/438557) # Es una simple regla de tres
+```
+
+Como bien se puede ver, 17/18 variables cuentan con todas sus celdas
+pobladas, a excepción de la variable "OCCUPATION_TYPE", esta variable es
+de tipo chr, y refleja el tipo de empleo que tienen cada uno de los
+candidatos, y por lo tanto, es una variable que puede ofrecer
+información interesante. La falta de 134203 valores en esta variable, es
+algo considerable si se estudia de manera aislada, pero además,
+proporcionalmente, tiene una gran repercusión en el juego de datos, pues
+la falta de 134203 valores de esa variable, se traduce en una pérdida
+del 30'6% de valores (en caso de eliminar todos los registros asociados
+a dichos valores). Por lo tanto, se va a calcular el número de veces que
+cada uno de los posibles valores que puede tomar esta variable, aparece
+en el juego de datos:
+
+```{r}
+a = table(df_original['OCCUPATION_TYPE'])
+print(a)
+```
+
+Como se puede ver, hay una gran variedad de empleos, no obstante, el
+valor que mas se repite es el de "", esto significa que hay más celdas
+que están vacías que ninguna otra celda con otro valor. Ahora, se van a
+eliminar las celdas vacías y se va a intentar transformar los distintos
+empleos en variables numéricas, para intentar hacer una media (después
+del siguiente chunk veremos porque)
+
+```{r}
+df_mod <- df_original[apply(df_original != "", 1, all), ]
+head(df_mod)
+tail(df_mod)
+
+#Ahora que se han eliminado los registros con columnas vacías, ahora se calcula la media de valores de la variable OCCUPATION_TYPE
+a <- table(df_mod['OCCUPATION_TYPE'])
+print(head(a))
+print(head(as.numeric(df_mod$OCCUPATION_TYPE)))
+
+```
+
+Como puede verse arriba, transformar valores de tipo string a valores
+numéricos, no sale bien. A continuación se explica porque se quería
+hacer esto.
+
+En este caso hay dos opciones a tener en cuenta para resolver este
+problema:
+
+-   Como faltan 134203 valores, se puede optar por eliminar esos
+    registros enteros.
+-   Se podrían poblar las celdas vacías con el empleo más común, pues no
+    se puede calcular la media de variables de tipo string (de hecho se
+    ha probado a pasar a numérico los empleos, pero ha dado error. Esto
+    puede verse arriba)
+
+Teniendo en cuenta las dos opciones de arriba, hay que recordar, que una
+de los aspectos más importantes de un proyecto de minería de datos es el
+de trbajar inteligente y eficientemente. Es por esto, que aunque la
+segunda opción, es menos intrusiva y algo más conservadora (se conservan
+todos esos registros pero con nuevos empleos metidos por nosotros), la
+primera puede resultar más eficiente e inteligente, por dos motivos. El
+primero y más relevante, es la cantidad de registros. El juego de datos
+tiene 438557 filas, lo que se traduce en mucha información, que puede
+ralentizar el proceso de análisis sin añadir conocimiento (esto es una
+posibilidad). El segundo motivo tiene que ver con los valores que se le
+meterían a cada una de las posiciones vacías de dicha variable, ya que
+rellenar casi el 31% del total, con el empleo más común no es algo que
+me resulte correcto, de cara a la aplicación del modelo clasificatorio.
+Por lo que considero que es más oportuno, tener un 31% de filas menos,
+que rellenar el 31% de los datos con el empleo que más ocurrencia tiene.
+
+Como se ha optado por la primera opción, de ahora en adelante, se va a
+hacer uso del *dataset* que no tiene celdas vacías, eliminando los
+registros con alguna celda vacía.
+
+Volviendo a la exploración general de los datos, ahora se van a calcular
+las estadísticas básicas de cada una de las características del juego.
+Esto puede verse en el siguiente *chunk* de código.
+
+```{r}
+summary(df_mod)
+```
+
+De este resultado, se observan los siguientes aspectos:
+
+-   Al eliminar el 30.6% del total de datos, ahora se cuentan con 304354
+    registros (438557-134203).
+-   Las variables/características de tipo "str" no arrojan datos
+    estadísiticos, pues no son enteros. Habría que estudiar los posibles
+    valores de estas y sus ocurrencias. Seguramente en el siguiente
+    apartado pude que se transformen a variables enteras o binarias,
+    dependiendo de su relevancia en el caso de estudio, y del número de
+    valores que puedan tomar.
+-   Se podría calcular el valor absoluto de las variables "DAYS_BIRTH" y
+    "DAYS_EMPLOYED" de cara a una mayor facilidad para procesarlas y
+    relacionarlas con el resto de variables (sobretodo a la hora de
+    diseñar un gráfico con ellas, para evitar el eje negativo)
+-   La variable "FLAG_MOBIL" no aporta información y tampoco va a
+    aportar conocimiento, porque siempre toma el 1 como valor, por lo
+    tanto, en caso de no añadir más registros al *dataset* en el futuro,
+    esta variable podría eliminarse.
+-   Respecto a la variable "CNT_CHILDREN", esta muestra como el número
+    máximo de hijos que tiene un candidato, es de 19, pero luego la
+    media de hijos, es de 0.511. Esto es algo bastante sorprendente,
+    pues me esperaba que el número medio de hijos fuese 1 o 2. Por lo
+    que puede ser que ese 19 sea un *outlier*. No obstante, si en la
+    columna "CNT_FAM_MEMBERS" aparecen 20 familiares, significa que el
+    dato es real, pero, este registro podría confundir al modelo de
+    clasificación, al tener un valor tan extremo.
+-   Respecto al salario anual de los candidatos, i.e.,
+    "AMT_INCOME_TOTAL", puede verse como el salario máximo es de
+    6750000\$, mientras que el mínimo es de 27000\$, mientras que el
+    salario medio está en unos 194868\$
+-   Observando la variable "CNT_FAM_MEMBERS" se observa como el número
+    medio de integrantes del núcleo familiar es de 2.298 personas, por
+    lo que parecen predominar las parejas sin hijos, pues la variable
+    "CNT_CHILDREN" muestra que de media hay 0.5 hijos por familia.
+    Además, curiosamente, el candidato que tenía 19 hijos parece estar
+    sol\@, pues la variable "CNT_FAM_MEMBERS" indica que el máximo
+    número de integrantes familiares es de 20 personas (19+1).
+-   Por útltimo, las variables "FLAG_WORK_PHONE", "FLAG_PHONE" y
+    "FLAG_EMAIL" muestran como, de media, los candidatos no suelen tener
+    tener teléfono de trabajo, ni teléfono fijo, ni correo electrónico
+    correspondientemente. Esto se debe a que sus medias son: 0.2482,
+    0.2856 y 0.1175 respectivamente.
+-   La variable "ID" es el identificador del candidato en la base de
+    datos del banco. No obstante, esta variable, no aporta mucha
+    información, por lo tanto se podría eliminar, pues como referencia
+    ya se tiene el índice que ocupa el registro/candidato en la tabla.
+
+Como se ha podido comprobar antes, la variable "FLAG_MOBIL" no aporta
+información, es por esto que esta columna se elimina del juego de datos
+a continuación:
+
+```{r}
+table(df_mod$FLAG_MOBIL)
+drop <- c("FLAG_MOBIL") 
+df_mod = df_mod[,!(names(df_mod) %in% drop)] 
+sort(colnames(df_mod)) #COMPROBAMOS QUE LO HEMOS ELIMINADO
+```
+
+Ahora se va a comprobar si existen registros duplicados, para ello,
+comparo todas las columnas del *dataframe* sin tener en cuenta la
+columna "ID" porque si se tiene en cuenta la columna "ID" en dicha
+comparación, no se eliminaría ninguna columna, porque ningún ID se
+repite, y por lo tanto ninguna fila tendría todas sus columnas iguales
+respecto al resto de filas. No obstante, la columna ID no se está
+eliminando, ya que en el futuro (segunda PAC) se pretenden añadir las
+etiquetas a partir del otro *dataframe* ("credit_record.csv"), y esto
+solo se pude hacer a partir del ID de los candidatos, por eso hay que
+mantener dicha columna.
+
+```{r}
+df_sin_duplicados <- df_mod[!duplicated(df_mod[, -1]) & !duplicated(df_mod[, -1]), ] #Con el -1 indico que no quiero coger la columna de los IDs porque ningun ID se repite
+head(df_sin_duplicados)
+#print(df_sin_duplicados)
+```
+
+```{r}
+print(304354-62608)
+```
+
+Como se puede observar, ahora se ha pasado de tener 304354 registros, a
+tener 62608 registros.
+
+En este punto del proyecto, ya no hay registros duplicados, ni tampoco
+hay valores vacíos, asi como tampoco valores nulos. Es por esto que a
+continuación se va a continuar con la exploración de los datos, pero con
+la perspectiva de obtener conocimiento a partir del conjunto de datos
+limpios.
+
+Ahora se van a reresentar los valores que pueden tomar cada una de las
+variables (excepto las variables relacionadas con dinero o cantidades
+que no son binarias) las varianzas e histogramas de las 4 variables más
+interesantes. De entre todas las variables del *dataset* principal
+(i.e., "application_record.csv") , las variables que resultan más
+atractivas para este primer estudio, por el tipo de dato que pueden
+tomar como valor, así como por lo que representan, son:
+**"AMT_INCOME_TOTAL"**, **"CNT_CHILDREN"**, **"NAME_EDUCATION_TYPE"** y
+**"FLAG_OWN_REALTY"**.
+
+```{r}
+#Ahora se obtienen los posibles valores de cada una las 4 variables:
+#table(df_sin_duplicados$AMT_INCOME_TOTAL)
+print('Estos son los valores de la cantidad de hijos y sus ocurrencias')
+table(df_sin_duplicados$CNT_CHILDREN)
+print('Estos son los niveles de educación de los candidatos y sus ocurrencias')
+table(df_sin_duplicados$NAME_EDUCATION_TYPE)
+print('Este es el número de gente con y sin propiedad y sus ocurrencias')
+table(df_sin_duplicados$FLAG_OWN_REALTY)
+print('Estos son los tipos de casas y sus ocurrencias')
+table(df_sin_duplicados$NAME_HOUSING_TYPE)
+print('Estos son el número de mujeres y hombres y sus ocurrencias')
+table(df_sin_duplicados$CODE_GENDER)
+print('Estos son los tipos de familias y sus ocurrencias')
+table(df_sin_duplicados$NAME_FAMILY_STATUS)
+print('Estos son los tipos de trabajos y sus ocurrencias')
+table(df_sin_duplicados$NAME_INCOME_TYPE)
+
+# Varianzas: cat("Varianza atributo RUR_URB: ", var(datos["RUR_URB"]),"\n")
+cat("Varianza atributo AMT_INCOME_TOTAL: ", var(df_sin_duplicados$AMT_INCOME_TOTAL),"\n")
+cat("Varianza atributo CNT_CHILDREN: ", var(df_sin_duplicados$CNT_CHILDREN),"\n")
+
+par(mfrow = c(1, 2))  # Dividir la ventana de gráficos en dos
+
+hist(df_sin_duplicados$AMT_INCOME_TOTAL,main = "Salario anual",
+     xlab = "Valores",
+     ylab = "Frecuencia",
+     col = "skyblue",
+     border = "black")
+
+# cuentas <- table(df_sin_duplicados$AMT_INCOME_TOTAL)
+# barplot(prop.table(cuentas),col=c("green","grey","blue","cyan","orange"), main=" Educación", ylab = "Porcentaje (%)" ,names.arg=c("Degree","H.education","Inc.higher","L.secondary", "Sec or sec.special"), las = 2)
+cuentas <- table(df_sin_duplicados$CNT_CHILDREN)
+barplot(prop.table(cuentas), col=c("green","brown","blue","cyan","orange","purple","red","yellow","black","violet","pink"),main="Num hijos", ylab = "Porcentaje (%)")
+
+cuentas <- table(df_sin_duplicados$FLAG_OWN_REALTY)
+barplot(prop.table(cuentas),col=c("green","blue"), main="(%) CON y SIN propiedad",xlab ="FLAG_OWN_REALTY", ylab = "Porcentaje (%)")
+
+cuentas <- table(df_sin_duplicados$NAME_EDUCATION_TYPE)
+barplot(prop.table(cuentas),col=c("green","grey","blue","cyan","orange"), main=" Educación", ylab = "Porcentaje (%)" ,names.arg=c("Degree","H.education","Inc.higher","L.secondary", "Sec or sec.special"), las = 2)
+
+cuentas <- table(df_sin_duplicados$NAME_HOUSING_TYPE)
+barplot(prop.table(cuentas), col=c("green","brown","blue","cyan","orange","purple"),main=" Tipo de casa", ylab = "Porcentaje (%)", las = 2)
+
+cuentas <- table(df_sin_duplicados$CODE_GENDER)
+barplot(prop.table(cuentas), col=c("green","blue"),main="Sexo", ylab = "Porcentaje (%)")
+
+cuentas <- table(df_sin_duplicados$NAME_FAMILY_STATUS)
+barplot(prop.table(cuentas), col=c("green","brown","blue","orange","purple"),main="Familias", ylab = "Porcentaje (%)", las = 2)
+
+cuentas <- table(df_sin_duplicados$NAME_INCOME_TYPE)
+barplot(prop.table(cuentas), col=c("cyan","red","blue","orange","purple"),main="Trabajos", ylab = "Porcentaje (%)", las = 2)
+
+```
+
+Como se puede observar la varianza de la variable "AMT_INCOME_TOTAL" es
+desorbitada, y esto se debe a que los salarios suelen ser altos y a eso
+se le suma el salario máximo, que en este caso es de 6750000, esta cifra
+podría ser un *outlier*. La varianza de la variable "CNT_CHILDREN" es
+parecida a la media, ya que respectivamente se tiene que:
+$\sigma = 0.589052$ 0.589052 y $\mu = 0.511$. Observando el gráfico del
+número de hijos, se observa como la mayoría de clientes no tienen hijos,
+mientras que el número de hijos más repetido es 1, para este gráfico se
+observa un decrecimiento racional.
+
+Pasando al par de gráficas correspondientes a las variables de si los
+candidatos tienen o no propiedad y el tipo de educación de estos, se
+observa como para la primera, lo más común entre los candidatos es tener
+propiedad (\~67%) mientras que un (\~33%) no tiene propiedad. Respecto a
+la educación de los candidatos, se ve como la mayoría (\~70%) solo
+tienen la secundaria/secundaria especial, seguido de un (\~30%) de
+candidatos con educación superior.
+
+En el penúltimo par de gráficas, dónde se proyecta el porcentaje para
+cada tipo de casas, así como el sexo de los candidatos.puede verse como
+la mayoría de los candidatos (\~90%) viven en una casa/apartamento,
+seguido de un 5-7'5% de candidatos que aún viven con sus padres. Por
+último, y relativo al sexo de los candidatos, se observa como un 60% de
+los candidatos son mujeres, mientras que el 40 % son hombres. Esta
+variable puede resultar muy interesante, puesto que puede ayudar a
+entender posibles patrones o estilos de vida diferentes entre hombres y
+mujeres (relativos al *dataset* que se está estudiando) No obstante, con
+este tipo de variables hay que tener cuidado, pues hay que evitar
+cualquier sesgo o connotación negativa que perpetuen estereotipos acerca
+de un sexo o de otro en distintos ámbitos de estudio.
+
+Para finalizar con este conjunto de representaciones, en el último par
+de gráficas, se observan las variables familias y trabajos. En el caso
+de las familias, puede verse como en más de un 80%, los candidatos están
+casados, seguido por un \~15% de candidatos que no están casados o que
+están separados. En relación al tipo de trabajos, se ve como en más de
+un 60%, los candidatos trabajan, mientras que casi un 30% son
+comerciales asociados, seguidos por *"state servant"*, en castellano:
+funcionario del estado.
+
+De este pequeño estudio se infiere, como mayoritariamente, los
+candidatos no suelen tener hijos, y si tienen, suelen tener solo 1,
+suelen ser personas con propiedad y con estudios de secundaria. Además,
+estos candidatos suelen vivir en apartamentos o casas, y son más mujeres
+que hombres las que quieren optar a una tarjeta de crédito. Pues en la
+base de datos se observa una gran diferencia entre el gran número de
+mujeres candidatas, frente a tan solo el 40% de sus compañeros hombres.
+Por último, y mayoritariamente, los candidatos están casados (80%) y el
+\~60% de ellos, trabaja.
+
+Se va a proceder a construir una matriz *scatterplot*, en castellano:
+matriz de dispersión. A fin de poder visualizar las relaciones entre
+variables, a partir de sus gráficos de puntos:
+
+```{r}
+pairs(df_sin_duplicados[c("AMT_INCOME_TOTAL","CNT_CHILDREN","CNT_FAM_MEMBERS","DAYS_BIRTH","DAYS_EMPLOYED")])
+```
+
+Como se puede ver por la matriz de dispersión, del ingles *scatterplot
+matrix* obtenida arriba, en todos los gráficos se observan algunas
+muestras alejadas del resto, estas muestras podrían corresponderse con
+*outliers* y por lo tanto hay que examinarlo (esto se hace más adelante)
+
+Antes de analizar resultado por resultado, es pertinente recordar la
+dinámica de una matriz de dispersión, aquellos títulos de variables que
+se encuentren en la misma fila que 4 gráficas cualesquiera, determinará
+la coordenada y, mientras que aquellos títulos de variables que se
+encuentren en la misma columna que otras 4 gráficas cualesquiera, dicho
+título caracterizará la variable x.
+
+Estudiando la gráfica correspondiente a la celda de la primera fila y
+segunda columna, se observa como la relación entre el salario anual (eje
+y) y la cantidad de hijos (eje x) es inversamente proporcional, ya que a
+medida que el número de hijos aumenta, el salario anual disminuye. Esta
+es una relación interesante a tener en cuenta, no obstante, cabe
+destacar que la correlación de estas dos variables es baja (esto puede
+comprobarse con la matriz de correlaciones de abajo). Este mismo
+comportamiento que se ha identidicado, también aplica para la cantdad de
+miembros del núcleo familiar, por razones obvias. Luego, para el salario
+anual (eje y) y el número de días del cumpleaños (eje x) se observa una
+especie de colina, que se parece a una distribución normal, además
+gráficamente puede verse como la varianza es grande, pues la colina no
+es muy alta. Y si bien recordamos, la varoable "AMT_INCOME_TOTAL" tenía
+una varianza desorbitada. Por último y cerrando esta fila, a diferencia
+de los dos primeros gráficos descritos, en este caso se observa una
+relación directamente proporcional entre el salario anual (eje y) y el
+número de días que el candidato lleva (empleado), no obstante, en este
+caso hay que tener especial cuidado, ya que la variable "DAYS_EMPLOYED"
+es negativa, significando esto, que si el salario anual, aumenta con el
+aumento de la variable "DAYS_EMPLOYED", en la práctica, significa que el
+salario anual de los candidatos, aumenta según el número de días que
+llevan empledos disminuyen. Es decir, el salario de de los candidatos
+que menos llevan trabajando es mayor, lo cual suena un tanto
+contraproducente, y en la práctica, estas dos variables guardan una
+relación inversamente proporcional. De todos modos, como se puede
+observar, la correlación de esta fila de gráficas es baja respecto a las
+variables de sus respectivas columnas (se puede comprobar abajo con la
+matriz de correlaciones)
+
+Pasando a la segunda fila de gráficos, se observa como la primera
+gráfica repite el comportamiento de la primera gráfica de la fila
+anterior, pero en este caso se observa como los ejes de la primera
+gráfica del anterior párrafo son los mismos que los de esta, pero
+intercambiados de eje. Luego, la segunda gráfica, correspondiente a la
+relación entre el número de miembros de familia (eje x) y el número de
+hijos (eje y) muestra un comportamiento puramente lineal y muestra una
+gran correlación, algo esperable, ya que esto se ha estudiado antes (más
+hijos implican más miembros en la familia, por lo tanto, nada nuevo). La
+tercera gráfica muestra un comportamiento similar al de la gráfica que
+tiene encima suyo. Tanto está gráfica, como la que hay encima suya (ya
+descrita arriba) y la que hay debajo, no se va a estudiar en profundidad
+porque a simple vista no muestran ningun comportamiento característico,
+además las variables que conforman dichas variables parecen no estar
+relacionadas, puesto que la variable "DAYS_BIRTH" es puramente
+propbabílistico. Por último, en la última gráfica de esta fila, y al
+igual que pasaba con la gráfica que hay encima de esta, se observa una
+relación inversamente proporcional entre las variables "DAYS_EMPLOYED" y
+la cantidad de hijos, pues cuando la cantidad de hijos aumenta, el
+número de días que un candidato lleva empleado disminuye.
+
+Para simplificar el análisis y no hacerlo más largo de lo que ya es, se
+van a destacar los aspectos más relevantes de las tres últimas filas de
+graficos. En la antepenúltima fila destacamos la relación lineal obvia
+de la gráfica que relaciona el número de hijos con el número de
+familiares. De hecho, la tercera fila es bastante semejante a la segunda
+pues en vez de tener el número de hijos en el eje y, se tiene el número
+de familiares. Por lo tanto, los totalidad de los comportamientos
+analizados en el anterior párrafo aplican perfectamente a esta fila de
+gráficas, pues se sabe que las dos variables son linealmente
+propocionales.
+
+En la penúltima fila, se encuentran las gráficas con los días que han
+pasado desde el cumpleaños del candidato, en el eje y. En las tres
+primeras figuras, no se obervan omportamientos característicos, no
+obstante, en la última figura (cumpleaños (eje y) y número de días como
+empleado (eje x)) se observa como la correlación entre estas dos
+variables es mayor respecto al resto de variables, a excepción del
+conjunto compuesto por el número de hijos y el número de familiares. En
+esta última gráfica de la penúltima fila, se observa como según
+disminuye el número de días en los que los candidatos han estado
+empleados, el número de días desde que fueron sus respectivos
+cumpleaños, también decrece. Esta es una relación bastante interesante,
+pero ahora mismo no le encuentro la lógica.
+
+Finalizando con la última fila de figuras, no destaca ninguna figura,
+además, las figuras de la última fila ya se han explicado en la primera,
+segunda, terecer y cuarta fila. Por lo tanto no hay mucho más que
+añadir.
+
+A continuación se construye la matriz corrplot, para ver en valor
+numérico de las correlaciones y su relación con otras variables
+relevantes.
+
+```{r}
+if(!require("corrplot")) install.packages("corrplot"); library("corrplot")
+n = c("AMT_INCOME_TOTAL","CNT_CHILDREN","CNT_FAM_MEMBERS","DAYS_BIRTH","DAYS_EMPLOYED")
+factores= df_sin_duplicados %>% select(all_of(n))
+res<-cor(factores)
+corrplot(res,method="color",tl.col="black", tl.srt=30, order = "AOE",
+number.cex=0.75,sig.level = 0.01, addCoef.col = "black")
+```
+
+Antes de estudiar la correlación más obvia del resultado obtenido arriba
+(matriz de correlaciones) cabe destacar la correlación significativa,
+que hay entre las variables "DAYS_EMPLOYED" y "DAYS_BIRTH", viendo esta
+correlación: 0.35, en la escala de valores de la derecha, se ve como
+esta cifra, se encuentra en la parte alta, analiticamente hablando. Por
+lo tanto habrá que prestar atención a este conjunto de variables en
+estudios posteriores.
+
+Como se puede observar, hay una gran correlación entre la variable
+"CNT_CHILDREN" y "CNT_FAM_MEMBERS", pues esta es de 0.89. Esto era algo
+de esperar, sabiendo lo que significan los dos campos, pues
+"CNT_CHILDREN" refleja el número de hijos, mientras que
+"CNT_FAM_MEMBERS" contabiliza el número de miembros de la unidad
+familiar. Por lo tanto, si el número de hijos aumenta, el número de
+integrantes de la unidad familiar también los hace, por lo tanto, al
+obtener una correlación tan alta, se podría eliminar una de las
+variables. El criterio de eliminación de una variable es el mismo que se
+ha visto en teoría, y es que, el atributo que menos relación guarde con
+el objetivo principal del proyecto. es el que ha de ser eliminado. Por
+ello, se han hecho las siguientes consideraciones:
+
+-   La variable "CNT_CHILDREN" solo contabiliza los hijos, por lo que
+    por si sola, aporta información relevante.
+-   La variable "CNT_FAM_MEMBERS" contempla al candidato, a sus hijos y
+    tambien a su mujer o marido en caso de estar casado/casada.
+
+Teniendo en cuenta los dos puntos anteriores, parece que la variable a
+eliminar podría ser la del número de hijos, pues la variable
+"CNT_FAM_MEMBERS" contempla todo el núcleo familiar y por consecuente es
+una variable más informativa. No obstante, también es importante conocer
+el número aislado de hijos, simplemente por el hecho de que los
+candidatos tienen la potestad de elegir si tienen o no hijos, en cambio,
+no tienen potestad para decidir el número exacto de integrantes
+familiares, ya que ducha variable viene determinada por otras dos
+variables (número de hijos y estado civil (NAME_FAMILY_STATUS)), por lo
+que en el fondo, la variable a eliminar sería: "CNT_FAM_MEMBERS".
+
+```{r}
+drop <- c("CNT_FAM_MEMBERS") 
+df_sin_duplicados_2 = df_sin_duplicados[,!(names(df_sin_duplicados) %in% drop)] 
+sort(colnames(df_sin_duplicados_2)) #COMPROBAMOS QUE LO HEMOS ELIMINADO
+```
+
+Nótese, que se ha tenido que comentar el código que elimina la columna
+mencionada antes, porque a la hora de generar el documento .HTML (con la
+celda anterior ya ejecutada) la renderización del HTML se para porque en
+celdas anteriores se está especificando el nombre de esa columna, por
+eso se ha comentado el código.
+
+A continuación se va a proceder a eliminar los valores extremos que se
+han visto en la matriz de dispersión de arriba, para realizar esta tarea
+me he basado en el siguiente ejemplo:
+[Geeksforgeeks](https://www.geeksforgeeks.org/how-to-remove-outliers-from-multiple-columns-in-r-dataframe/a).
+Pero antes comprobamos las estadísticas del *dataframe* para luego
+comparar los resultados.
+
+```{r}
+summary(df_sin_duplicados_2)
+```
+
+Lo que hace el siguiente código, es calcular el primer y tercer cuantil,
+para determinar si el valor de la columna que se está inspeccionando es
+un *outlier* o no. A partir de estas dos métricas, se calcula su
+diferencia como un rango intercuartílico. Entonces, si una observación
+es 1,5 veces el rango intercuartílico mayor que el tercer cuartil o 1,5
+veces el rango intercuartílico menor que el primer cuartil, la función
+devuelve un *True* y dicho registro, queda categorizado como un
+*outlier*.
+
+```{r}
+# Primero se hace una copia del dataframe que hemos ido procesando a lo largo del estudio:
+# df_sin_duplicados_copia<-data.frame(df_sin_duplicados_2)
+# 
+# detector_outlier <- function(x) {
+#  
+#     Quantile1 <- quantile(x, probs=.25) # cálculo del primer cuantil
+#     Quantile3 <- quantile(x, probs=.75)  # cálculo del tercer cuantil
+#     IQR = Quantile3-Quantile1 # cálculo del rango intercuartílico
+#  
+#     # X devuelve verdadero o falso
+#     x > Quantile3 + (IQR*1.5) | x < Quantile1 - (IQR*1.5)
+# }
+#  
+# # se crea la función para eliminar los outliers
+# remove_outlier <- function(dataframe,
+#                             columns=names(dataframe)) {
+#  
+#     # iteramos en las columnas deseadas
+#     for (col in columns) {
+#         dataframe <- dataframe[!detector_outlier(dataframe[[col]]), ] # si cumple las condiciones de la función de arriba, se elimina el registro
+#     }
+# }
+#  
+# remove_outlier(df_sin_duplicados_copia, c("AMT_INCOME_TOTAL","CNT_CHILDREN","CNT_FAM_MEMBERS","DAYS_BIRTH","DAYS_EMPLOYED"))
+# summary(df_sin_duplicados_copia)
+```
+
+He estado teniendo muchos problemas con R-STUDIO últimamente, y
+misteriosamente, el código de arriba en algunas ejecuciones modifica las
+columnas "CNT_CHILDREN" y "AMT_INCOME_TOTAL" y en otras no, esto
+significa que en las ejecuciones que modifica esas dos columnas, debe de
+detectar *outliers*. De hecho, cuando "detecta" esos *outliers*, la
+columna "CNT_CHILDREN" adquiere valores negativos y decimales (no solo
+en la media, pero también en el valor mínimo y máximo) algo que como es
+obvio, no es aceptable, porque el número de hijos es siempre poitivo y
+entero. Pero luego, parece que la modificación que hace en la columna
+"AMT_INCOME_TOTAL" es más realista, ya que el salario máximo que muestra
+luego es de uno 61000, no obstante esto no es aceptable, pues la mayría
+de los candidatos tienen salarios mucho más elevados. Además se ha visto
+como se modifican otras variables, de manera significativa, por lo que
+finalmente se ha optado por comentar este código, ya que no estaba
+seguro de los resultados.
+
+Es por lo anterior, que se concluye el estudio de los *outliers*
+estableciendo que no hay *outliers* en el juego de datos, pero si que ha
+valores elevados, que aunque parezcan muy grandes (como el valor máximo
+de 6750000 en la columna "AMT_INCOME_TOTAL"), se corresponden con datos
+reales, de hecho es lo que se menciona en la página web del *dataset*
+que puede encontrarse en el apartado de las referencias de este
+documento.
+
+```{r}
+# if (!require('tidyverse')) install.packages('tidyverse'); library('tidyverse')
+# cor.test(x = df_sin_duplicados$AMT_INCOME_TOTAL, y = df_sin_duplicados$DAYS_EMPLOYED, method = "kendall")
+# ggplot(data = df_sin_duplicados, aes(x = PERSONS, y = log(FATALS))) + geom_point(color = "gray30") + geom_smooth(color = "firebrick") + theme_bw() +ggtitle("Correlación entre personas implicadas en el accidente y número de muertes")
+```
+
+Ahora se comprueba de nuevo las estadísticas de las variables del
+*dataframe* para comprobar si se han eliminado los valores extremos de
+19 hijos en la columna "CNT_CHILDREN" y la cantidad 6750000 en la
+columna "AMT_INCOME_TOTAL".
+
+```{r}
+# summary(df_sin_duplicados_copia)
+```
+
+```{r}
+summary(df_sin_duplicados_2)
+```
+
+También es importante llevar a cabo una normalización de las variables,
+pues tal y como se pudo ver en la PEC anterior, este procedimiento
+permitió la correcta aplicación de algoritmos como los *k-means*, donde
+claramente se vió como si no se normalizaban los datos, los resultados
+que arrojaba el algoritmo no eran buenos. Esto se debe a la diferencia
+de escala entre variables, siendo esto el principal detonante, en cuanto
+a contribuciones desequilibradas de distinas variables en el modelo.
+
+```{r}
+# Se especifican las columnas que se quieren normalizar
+norm_cols <- c("AMT_INCOME_TOTAL","CNT_CHILDREN","DAYS_BIRTH","DAYS_EMPLOYED")
+
+# Se normalizan las columnas deseadas
+df_sin_duplicados[norm_cols] <- scale(df_sin_duplicados_2[norm_cols])
+
+pairs(df_sin_duplicados[c("AMT_INCOME_TOTAL","CNT_CHILDREN","DAYS_BIRTH","DAYS_EMPLOYED")])
+summary(df_sin_duplicados_2)
+```
+
+```{r}
+summary(df_sin_duplicados_2)
+```
+
+Nótese como ahora hay una variable menos, porque como bien se ha
+comentado antes, anteriomente se ha optado por eliminar la variable
+"CNT_FAM_MEMBERS" puesto que no aportaba información adicional al juego
+de datos.
+
+Como puede verse en la matriz de dispersión de arriba, los datos son más
+uniformes, y siguen tendencias más claras. La normalización será de
+especial importancia de cara a la implementación del modelo deseado,
+pues determinará la calidad de los resultados y la adaptación del modelo
+a los datos.
+
+Se ha sacado bastante información del juego de datos, así como
+relaciones muy valiosas, gracias principalmente a las *scatterplot
+matrices*. Además se ha hecho una liempieza exhaustiva de los datos, que
+al principio ha supuesto un gran reto, por la cantidad de datos
+duplicados que había, valores vacíos, etc. Hay muchos pasos estudiados
+en el primer tema de la asigntura, que no se han tenido que implementar
+en este estudio, simplementa porque no aplicaban al juego de datos
+escogido, un ejemplo es: la aproximación decimal.
+
+En el siguiente apartado se va a proceder con la discretización de
+varias variables numéricas.
+
+## Discretización
+
+El método de discretización de variables, es un método muy común dentro
+del mundo del aprendizaje automático (*machine learning*) ya que, como
+bien hemos estudiado en teoría, su implemetación en un juego de datos
+trae múltiples ventajas, como por ejemplo: reducción del coste
+computacinal, incremento del proceso de aprendizaje, disminución de
+espacio de almacenaje, disminución de tamaño del modelo resultante.
+Además de que la implemetación de este tipo de técnicas, mejora la
+comprensión de algunos modelos, porque hay menos términos descriptivos.
+Tal y como ya vimos en el primer tema de teoría y como dijo Pablo
+Picasso: "El arte está en eliminar lo innecesario". Esto proceso también
+tiene relación con un paso que ya se ha dado en el anterior apartado,
+que es el de eliminar variables que no aportan información, por lo que,
+podríamos decir que el *dataset* va por buen camino.
+
+Adicionalmente, Irán Apolinar en
+[RPubs](https://rpubs.com/IranNash/discretizacion), explica como la gran
+cantidad de variables continuas en un juego de datos, pueden complicar
+el aprendizaje del modelo aplicado. Por lo tanto, al convertir una
+variable continua, en una discreta, estaremos permitiendo que el
+algoritmo trabaje con la frecuencia en términos de ocurrencia, del nuevo
+conjunto finito de valores, construido a partir de un conjunto enorme de
+valores.
+
+Las variables candidatas que se han identificado son las siguientes:
+
+-   **"AMT_INCOME_TOTAL"**. Es una de las variables numéricas, con más
+    diferencia entre diferentes registros, pues su varianza es de
+    11567351907.
+-   **"DAYS_EMPLOYED"**. Es una variable con mucha varianza, ya que esta
+    es de 5313812. Por lo tanto, discretizar este valor para poder
+    identificar los rangos numéricos más frecuentados, es una obligación
+    para facilitarle en un futuro, la tarea de aprendizaje al modelo
+    predictivo (i.e., modelo de clasificación)
+-   **"DAYS_BIRTH"**. Este es una variable que contempla una gran
+    cantidad de valores, por ello su varianza es tan alta: 12482904. Por
+    lo tanto, la identificación de regiones/intervalos de partición,
+    contribuiría positivamente en el aprendizaje del modelo.
+
+```{r}
+cat("Varianza variable AMT_INCOME_TOTAL: ", var(df_sin_duplicados_2["AMT_INCOME_TOTAL"]),"\n")
+cat("Varianza variable DAYS_EMPLOYED: ", var(df_sin_duplicados_2["DAYS_EMPLOYED"]),"\n")
+cat("Varianza variable DAYS_BIRTH: ", var(df_sin_duplicados_2["DAYS_BIRTH"]),"\n")
+```
+
+Primero hay que elegir el tipo de discretización que se quiere llevar a
+cabo, como se vió en teotía, hay varias formas:
+
+-   Método de partición en intervalos de la misma amplitud.
+-   Obtención de intervalos de discretización de igual frecuencia.
+-   Método de partición basado en el algoritmo *k-means*.
+
+Como se ha mencionado antes, lo que se quiere es que el modelo pueda
+tener en cuenta la frecuencia con la que un intervalo aparece en un
+juego de datos por lo tanto. Tanto el primer método como el segundo
+quedan descartados. Además, como se vió en tería, el primer método no es
+capaz de encontrar un valor de *k* suficientemente bueno.
+
+Dicho esto, nos podríamos decantar por el último método: **Método de
+partición basado en el algoritmo *k-means*.**, la base de este método la
+vimos en profundidad, en la teoría y en la PEC del segundo tema, y se
+sabe que aunque tiene muchos aspectos que mejorar, si se le meten unos
+buenos datos normalizados, este método basado en el algoritmo de
+*k-means* podría arrojar buenos resultados. No obstante, primero se van
+a discretizar las variables sin los datos normalizados.
+
+```{r}
+# Utilizaremos la función discretize de arules: This function implements several basic unsupervised methods to convert a continuous variable into a categorical variable (factor) using different binning strategies. 
+# https://cran.r-project.org/web/packages/arules/index.html
+if (!require('arules')) install.packages('arules'); library('arules')
+set.seed(2)
+
+# Primero se comienza por la variable: "AMT_INCOME_TOTAL"
+table(discretize(df_sin_duplicados_2$AMT_INCOME_TOTAL, "cluster" ))
+hist(df_sin_duplicados_2$AMT_INCOME_TOTAL, main="Rangos salariales con kmeans",xlab="Salarios", ylab="Cantidad",col = "ivory")
+abline(v=discretize(df_sin_duplicados_2$AMT_INCOME_TOTAL, method="cluster", onlycuts=TRUE),col="red")
+
+# Segundo se sigue con la variable: "DAYS_EMPLOYED"
+table(discretize(df_sin_duplicados_2$DAYS_EMPLOYED, "cluster" ))
+hist(df_sin_duplicados_2$DAYS_EMPLOYED, main="Número de días de los candidatos como empleados con kmeans",xlab="Días empleados", ylab="Cantidad",col = "ivory")
+abline(v=discretize(df_sin_duplicados_2$DAYS_EMPLOYED, method="cluster", onlycuts=TRUE),col="red")
+
+# Tercero se sigue con la  la variable: "DAYS_BIRTH"
+table(discretize(df_sin_duplicados_2$DAYS_BIRTH, "cluster" ))
+hist(df_sin_duplicados_2$DAYS_BIRTH, main="Número de días desde el cumpleaños con kmeans",xlab="Días desde el cumpleaños", ylab="Cantidad",col = "ivory")
+abline(v=discretize(df_sin_duplicados_2$DAYS_BIRTH, method="cluster", onlycuts=TRUE),col="red")
+```
+
+Se puede notar, como al ejecutar el algoritmo sin especificar ningún
+argumento y permitiendo que el sistema seleccione el conjunto de
+particiones, se pueden visualizar tres grupos que categorizan a las tres
+variables. Esto va a servir de gran ayuda al modelo de clasificación en
+la próxima práctica.
+
+Ahora, analizando más analíticamente los datos obtenidos y teniendo en
+cuenta el objetivo analítico de este proyecto, se podría decir que los
+rangos que se han identificado son correctos. Esto puede verse
+claramente con el primer gráfico, relativo a los salarios, donde la
+mayor parte de los salarios se situan en la franja de por debajo de los
+100000, por lo que es en esa zona con tanta ocurrencia, donde se
+necesita una mayor especificidad, y esto es exactamente lo que que el
+algoritmo estipula y consecuentemente arroja, tanto en la discretización
+de esta variable, como en las otras dos restantes.
+
+Ahora, con estos resultados, se puede asignar cada uno de los grupos
+como una nueva variable en el conjunto de datos para el estudio previo
+que habrá que realizar, al momento de meter el juego de datos en el
+modelo.
+
+```{r}
+df_sin_duplicados_2$AMT_INCOME_TOTAL_DIS <- (discretize(df_sin_duplicados_2$AMT_INCOME_TOTAL, "cluster" ))
+head(df_sin_duplicados_2$AMT_INCOME_TOTAL_DIS)
+
+df_sin_duplicados_2$DAYS_EMPLOYED_DIS <- (discretize(df_sin_duplicados_2$DAYS_EMPLOYED, "cluster" ))
+head(df_sin_duplicados_2$DAYS_EMPLOYED_DIS)
+
+df_sin_duplicados_2$DAYS_BIRTH_DIS <- (discretize(df_sin_duplicados_2$DAYS_BIRTH, "cluster" ))
+head(df_sin_duplicados_2$DAYS_BIRTH_DIS)
+
+write.csv(df_sin_duplicados_2, "application_record_final.csv", row.names = FALSE)
+```
+
+Ahora se comprueba la inclusión de estas tres nuevas variables, en el
+juego de datos:
+
+```{r}
+summary(df_sin_duplicados_2)
+```
+
+```{r}
+head(df_sin_duplicados_2)
+```
+
+A continuación se discretizan las variables normalizadas anteriormente.
+
+```{r}
+# Utilizaremos la función discretize de arules: This function implements several basic unsupervised methods to convert a continuous variable into a categorical variable (factor) using different binning strategies. 
+# https://cran.r-project.org/web/packages/arules/index.html
+if (!require('arules')) install.packages('arules'); library('arules')
+set.seed(2)
+
+# Primero se comienza por la variable: "AMT_INCOME_TOTAL"
+table(discretize(df_sin_duplicados$AMT_INCOME_TOTAL, "cluster" ))
+hist(df_sin_duplicados$AMT_INCOME_TOTAL, main="Rangos salariales con kmeans",xlab="Salarios", ylab="Cantidad",col = "ivory")
+abline(v=discretize(df_sin_duplicados$AMT_INCOME_TOTAL, method="cluster", onlycuts=TRUE),col="red")
+
+# Segundo se sigue con la variable: "DAYS_EMPLOYED"
+table(discretize(df_sin_duplicados$DAYS_EMPLOYED, "cluster" ))
+hist(df_sin_duplicados$DAYS_EMPLOYED, main="Número de días de los candidatos como empleados con kmeans",xlab="Días empleados", ylab="Cantidad",col = "ivory")
+abline(v=discretize(df_sin_duplicados$DAYS_EMPLOYED, method="cluster", onlycuts=TRUE),col="red")
+
+# Tercero se sigue con la  la variable: "DAYS_BIRTH"
+table(discretize(df_sin_duplicados$DAYS_BIRTH, "cluster" ))
+hist(df_sin_duplicados$DAYS_BIRTH, main="Número de días desde el cumpleaños con kmeans",xlab="Días desde el cumpleaños", ylab="Cantidad",col = "ivory")
+abline(v=discretize(df_sin_duplicados$DAYS_BIRTH, method="cluster", onlycuts=TRUE),col="red")
+```
+
+Como se puede observar, y comparando los resultados de arriba con los
+grupos obtenidos para el conjunto de datos sin normalizar, los grupos
+que se han obtenido en esta última discretización son exactamente los
+mismos que los que se han obtenido antes. Con la única diferencia de que
+los datos, al estar normalizados, varían ligeramente. En este caso, no
+se está aplicando el algoritmo de *k-means* como tal, sino un método de
+discretización basado en el *k-means* (algoritmo no supervisado) y por
+eso no vemos gran cambio entre la discretización de datos normalizados y
+sin normalizar.
+
+```{r}
+head(df_sin_duplicados_2)
+tail(df_sin_duplicados_2)
+```
+
+## Aplicación de estudios PCA y SVD
+
+Tanto el PCA: "análisis de componentes principales", del inglés:
+*"Principal Component Analysis"*, como la SVD: "descomposición de
+valores singulares", del inglés: *"Singular Value Decomposition"*, son
+metodologías que permiten trabajar con nuevas características llamadas
+componentes, que resultan ser independientes entre sí. En esencia, ambas
+técnicas hacen posible la representación del conjunto de datos en un
+nuevo sistema de coordenadas que se denomina componentes principales.
+Este sistema se ajusta óptimamente, a la distribución del juego de
+datos, capturando de manera más eficiente su variabilidad.
+
+A continuación se lleva a cabo el análisis de componentes principales en
+el juego de datos mediante la implementación del siguiente *chunk* de
+código. No obstante, primero, para asegurarnos de que se lleva a cabo
+correctamente el proceso, se van a normalizar, las columnas de valores
+enteros. Esta normalización se lleva a cabo para estandarizar las
+escalas de las variables continuas, por ello no se van a normalizar
+variables binarias, ya que solo toman dos valores (1 o 0), y por lo
+tanto ya están en una escala determinada. Dicho esto, véase la
+normalización y el análisis de componentes principales a continuación:
+
+```{r}
+# Se normalizan las columnas
+nor <-function(x) { (x -min(x))/(max(x)-min(x))}
+
+# Guardamos un nuevo dataset normalizado
+df_sin_duplicados_2$type<- NULL
+n = c("CNT_CHILDREN","AMT_INCOME_TOTAL","DAYS_BIRTH","DAYS_EMPLOYED")
+df_sin_duplicados_2<- df_sin_duplicados_2 %>% select(all_of(n))
+df_sin_duplicados_2_nor <- as.data.frame(lapply(df_sin_duplicados_2, nor))
+
+# Se visualiza solo el principio
+head(df_sin_duplicados_2_nor)
+
+pca.acc <- prcomp(df_sin_duplicados_2_nor)
+summary(pca.acc)
+```
+
+Como se puede ver por el resultado de arriba, ya se han normalizado
+correctamente las 4 variables continuas del juego de datos.
+
+Ahora bien, analizando los resultados devueltos por la función summary,
+se observa como esta ha devuelto, la desviación estándar, la proporción
+cumulativa, y la proporción de varianza aplicada al conjunto total de
+cada variable. Esto explica, que la variable PC1 tenga una proporción de
+varianza de 0.7383 (una variabilidad del todo el conjunto de datos de
+0.7383), mientras que la variable PC4 solamente tiene una proporción de
+0.00418 de variabilidad del total de datos.
+
+Ahora se va a representar el histograma asociado, a fin de visualizar el
+protagononismo que tiene cada variable en el conjunto total de datos:
+
+```{r}
+if (!require('factoextra')) install.packages('factoextra'); library('factoextra')
+# Los valores propios se corresponden con la cantidad de variación asociada a cada componente principal (PC).
+ev= get_eig(pca.acc)
+ev
+fviz_eig(pca.acc, addlabels=TRUE, hjust = -0.3)
+```
+
+Arriba, pueden verse gráficamente, los datos ya estudiados de manera
+analítica, en el *chunk* anterior. Por lo tanto no hay información
+adicional.
+
+No obstante, cabe destacar, que, con el objetivo de decidir, cuales de
+las variables que se han obtenido, van a ser escogidas, se ha aplicado
+el criterio de Káiser. Este criterio, estipula que todas las variables
+con varianza superior a 1 se mantienen, y es el mismo, el que tomará la
+decisión sobre las variables obtenidas.
+
+Seguidamente, se calcula varianza de los 4 "PCs" a partir de la
+desviación estándar
+
+```{r}
+var_acc <- pca.acc$sdev^2
+var_acc
+```
+
+Con los resultados obtenidos es muy complicado decidir cuáles son los
+componentes principales componentes a escoger. *Este hecho podría estar
+causado por no haber escalado los datos previamente.* Por lo tanto, el
+siguiente paso es escalar los datos y volver a calcular la varianza para
+ver qué datos selecciona.
+
+Resulta difícil determinar que componentes son las principales, a partir
+de las varianzas obtenidas arriba, ya que según el criterio de Káiser,
+las varianzas superiores a 1 se mantienen, no obstante, ninguna de las
+varianzas es capaz de llegar a la unidad. Esto puede deberse a que los
+datos no han sido previamente escalados, y es exactamente esto último lo
+que se va hacer a continuación, para poder calcular de nuevo las
+varianzas, y así distinguir mejor cuales componentes principales
+escoger.
+
+```{r}
+# Escalamos los datos
+acc_scale <- scale(df_sin_duplicados_2_nor)
+# Calculamos las componentes principales
+pca.acc_scale <- prcomp(acc_scale)
+# Mostramos la varianza de dichas variables:
+var_acc_scale <- pca.acc_scale$sdev^2
+head(var_acc_scale)
+```
+
+Efectivamente, se trataba de un tema de escalado de datos, como bien se
+puede ver por el resultado de arriba, solo hay una componente principal
+que supera la unidad, y por lo tanto es la única componente principal de
+entre las 4 variables inciales propuestas.
+
+Ahora se muestra el histograma de porcentaje de varianza explicado, con
+los datos escalados:
+
+```{r}
+fviz_eig(pca.acc_scale)
+ev = get_eig(pca.acc_scale)
+ev
+```
+
+Según (Káiser en 1961), los valores propios pueden utilizarse para
+determinar que componentes principales se han de conservar después del
+analísis de componentes principales. Un valor propio \> 1 indica una
+mayor varianza por parte de las componentes principales, que aquella que
+representa una de las variables originales de los datos estandarizados.
+Esto solo se cumple para un conjunto de datos estandarizado.
+
+Se procede a continuación con el análisis de las componentes
+principales. Aunque habiendo seleccionado ya la componente principal,
+puede que no tenga mucho sentido seguir con el análisis, pero a fin de
+culminar la explicación, y entender todo este estudio, se va a continuar
+con las 4 componentes inciales.
+
+```{r}
+var <- get_pca_var(pca.acc_scale)
+var
+```
+
+De la PEC1 se ha extraído la siguiente información que añade información
+adicional a la descricpción de arriba:
+
+-   **var\$coord**: coordenadas de variables para crear un diagrama de
+    dispersión.
+-   **var\$cos2**: representa la calidad de representación de las
+    variables al mapa de factores. Se calcula como las coordenadas al
+    cuadrado: var.cos2 = var.coord \* var.coord.
+-   **var\$contrib**: contiene las contribuciones (en porcentaje) de las
+    variables a los componentes principales. La contribución de una
+    variable (var) a un determinado componente principal es (en
+    porcentaje): (var.cos2 \* 100) / (cos2 total del componente).
+
+```{r}
+# Se van a utilizar las 4 componentes principales originales
+head(var$coord,11)
+```
+
+Ahora se va a estudiar la calidad de la representación de cada una de
+las variables, en el mapa de factores mediante la herrramienta del
+"coseno cuadrado" o "cos2". A esta herramienta se accede como sigue:
+
+```{r}
+head(var$cos2,11)
+```
+
+```{r}
+corrplot(var$cos2, is.corre=FALSE)
+```
+
+No obstante, con la función fviz_cos2() se puede armar un diagrama de
+barras de variables "cos2":
+
+```{r}
+fviz_cos2(pca.acc_scale, choice = "var", axes = 1:2)
+```
+
+Por la PEC1 se sabe que un alto valor del cos2, indica una buena
+representación de la variable en el componente principal. Como se puede
+comprpbar las variables que mejor representadas están, son:
+"AMT_INCOME_TOTAL" y "DAYS_BIRTH". Es por ello, que las dos vadiables,
+pero más seguramente; "AMT_INCOME_TOTAL" se coloca cerca de la
+circunferencia del círculo de correlación. No obstante, la variable
+"AMT_INCOME_TOTAL" necesita de las 4 componentes principales para poder
+representar perfectamente los datos. Es por esto último, que las
+variables se sitúan dentro del círculo de correlaciones.
+
+```{r}
+fviz_pca_var(pca.acc_scale,
+col.var = "cos2",
+gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+repel = TRUE
+)
+```
+
+Ahora se estudia la contribución.
+
+```{r}
+head(var$contrib,11)
+```
+
+Como se puede observar para la Dim.2 la variable "AMT_INCOME_TOTAL"
+contribuye sustancialmente con un 94.9030703%, seguida de la Dim.3 para
+la variable "CNT_CHILDREN" con una contribución del 64.7189777% que a su
+vez es seguida por una contribución del 53.7228763% por parte de la
+Dim.4 para la variable "DAYS_BIRTH". Cuando más grande sea el valor de
+la contribución, más contribución habrá al componente.
+
+```{r}
+corrplot(var$contrib[,1:4], is.cor=FALSE)
+```
+
+Finalmente, las variables que más contribuyen, se pueden resaltar en la
+gráfica de correlación de la siguiente manera:
+
+```{r}
+fviz_pca_var(pca.acc_scale, col.var = "contrib",
+gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07")
+)
+```
+
+En definitiva, la variable que más contribuye y que mejor representada
+está, es la variable "AMT_INCOME_TOTAL", no osbtante, esta variable
+necesita de las 4 componentes principales para poder representar a la
+perfección el conjunto de datos.
+
+## Conclusiones
+
+Esta práctica ha resultado ser una práctica muy interesante pero algo
+tediosa. Interesante, porque he tenido la oportunidad de estudiar de
+nuevo una base de datos nueva, que me ha permitido explorar nuevas
+relaciones entre variables, e implementar códigos más versátiles y
+eficientes. Ha sido muy entretenido haber explorado una base de datos
+nueva, y haberla tenido que limpiar y organizar, a fin de preparla para
+etapas posteriores del proyecto. No obstante, a pesar de que ha sido un
+proceso entretenido y lleno de detalles, la primera parte de la práctica
+me ha resultado un tanto complicada, pues me ha llevado mucho tiempo
+encontrar un *dataset* que cumpliese con todos los requisitos que se
+especifican en este enunciado y en el del campus virtual. Antes de
+escoger este *dataset* empecé a trabajar con uno que estaba relacionado
+con el alcohol y los estudiantes, pero lo tuvo que dejar porque a pesar
+de que cumplía con todos los requisitos en términos de tipos de
+variables, el *dataset* solo tenía 417 registros, por lo tanto no podía
+escoger ese. Despues de este primer *dataset* pasé a uno relacionado con
+el ámbito sanitario, más concretamente, a uno destinado a la detección
+de cancer de mama, pero a pesar de que este contaba con muchos
+registros, las variables eran mayoritariamente numéricas, y no había
+ninguna variable categórica ni binaria, por lo que tuve que emprender
+una nueva búsqueda, para finalmente escoger el *dataset* que se estudia
+en esta PAC.
+
+Como se ha podido ver en esta práctica, se ha tenido que llevar a cabo
+una purga considerable, en cuanto a valores vacíos, y registros
+duplicados. La parte de eliminación de duplicados ha sido difícil, ya
+que el código inicial no funcionaba correctamente, no obstante, este me
+ha permitido purgar significativamente el *dataset* algo que
+definitivamente ayudará en términos de ruido y rápidez de aprendizaje, a
+la hora de aplicar el modelo deseado.
+
+Además mediante el estudio estadístico de gran parte de las variables
+así como la relación entre algunas de ellas, nos ha permitido calcular
+la correlación, pudiendo detectar aquellas variables altamente
+relacionadas para luego eliminar una de ellas, tal y como se ha hecho.
+La razón de esta eliminación, reside en el objetivo de eliminar
+cualquier ruido posible en el juego de datos, pues si dos variables
+ofrecen casi la misma información, mantener las dos solo dificulta la
+tarea del modelo predictivo que se quiere aplicar en el juego de datos,
+y por ello, si hay variables que no aportan información adicional
+significativa, estas han de ser eliminadas. La representación de la
+matriz de dispersión y de nuevo, las correlaciones entre variables, nos
+han permitido ganar numerosos *insights* en cuanto a dependencias, a
+veces, incluso mostrando un comportamiento no esperado, como el de la
+relación inversamente proporcional entre el número de días contratado y
+la cantidad de hijos/ cantidad de familia, que mostraba como el número
+de hijos/ familiares aumentaba según el número de días empleado
+disminuía.
+
+En referencia a la discretización de las tres variables seleccionadas,
+se ha podido contemplar la efictividad que tiene la fución
+"discretize(·)" para distinguir 3 rangos de valores en tres variables
+con una gran varianza. Además, los tres grupos que se han creado,
+abarcan un intervalo, que desde el punto de vista del objetivo analítico
+del proyecto, es importante, puesto que, en el caso de la variable
+"AMT_INCOME_TOTAL" resulta de gran importancia conocer antes que todo,
+el salario de una persona antes de indagar más acerca de su información
+personal, para estudiar si es apto o no para tener una tarjeta de
+crédito en propiedad.
+
+Respecto al estudio de las componentes principales, i.e., PCA, se ha
+obtenido la medida relacionada con la asociación mutua entre las 4
+variables iniciales, que viene a ser su matriz de covarianza asociada.
+Además, este estudio ha arrojado información sobre la dirección de
+dispersión de los datos. Y se ha podido comprobar como de 4 componentes
+principales, solo 1 cumplía con el criterio de Káiser.
+
+En definitiva, hemos limpiado considerablemente el juego de datos, se
+han extraído relaciones muy interesantes, hemos podido facilitarle el
+futuro aprendizaje al modelo de clasificación, identificando intervalos
+sólidos y correctos. Y por último, el estudio PCA ha demostrado ser una
+herramienta útil para estudiar el impacto y las estadísticas de una
+variable respecto al resto de datos. Además, este estudio ha demostrado
+que las variables que mejor representadas están, son: "AMT_INCOME_TOTAL"
+y "DAYS_BIRTH". Es por ello, que "AMT_INCOME_TOTAL" se coloca cerca de
+la circunferencia del círculo de correlación.
+
+El siguiente paso, consistirá en incluir la etiqueta de "apto" y "no
+apto" en el *dataset* (a modo de variable binaria) que hemos procesado
+en este estudio, a partir del otro *dataset* mencionado antes, y que
+tiene el histórico bancario de los candidatos.
+
+------------------------------------------------------------------------
+
+# Referencias y bibliografía
+
+------------------------------------------------------------------------
+
+-   [Página web del dataset: Credit card
+    approval](https://www.kaggle.com/datasets/rikdifos/credit-card-approval-prediction?select=application_record.csv)
+-   [Foro de la página web del dataset: Credit card
+    approval](https://www.kaggle.com/datasets/rikdifos/credit-card-approval-prediction/discussion/119320)
+-   [Ventajas y desventajas de una tarjeta de
+    crédito](https://saberespoder.com/articles/finance/beneficios-de-las-tarjetas-de-credito)
+-   [Para eliminar las filas con carácteres
+    vacíos](https://www.geeksforgeeks.org/remove-rows-with-empty-cells-in-r/)
